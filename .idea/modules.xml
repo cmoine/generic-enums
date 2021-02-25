@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/annotations/auto-value-annotations.iml" filepath="$PROJECT_DIR$/annotations/auto-value-annotations.iml" />
+      <module fileurl="file://$PROJECT_DIR$/it/functional.iml" filepath="$PROJECT_DIR$/it/functional.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/generic-enums.iml" filepath="$PROJECT_DIR$/.idea/generic-enums.iml" />
+      <module fileurl="file://$PROJECT_DIR$/processor/generic-enums (1).iml" filepath="$PROJECT_DIR$/processor/generic-enums (1).iml" />
+    </modules>
+  </component>
+</project>

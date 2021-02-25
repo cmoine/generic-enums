@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true">
+        <sourceOutputDir name="." />
+      </profile>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="auto-value-annotations" />
+        <module name="functional" />
+        <module name="generic-enums (1)" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="auto-value" target="1.8" />
+      <module name="auto-value-annotations" target="1.6" />
+      <module name="functional" target="11" />
+      <module name="generic-enums" target="1.5" />
+      <module name="generic-enums (1)" target="1.8" />
+      <module name="gwtserializer" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="auto-value" options="-Xlint:all" />
+      <module name="auto-value-annotations" options="-Xlint:all" />
+      <module name="functional" options="-Xlint:all -Xlint:all -encoding utf8" />
+      <module name="generic-enums (1)" options="-Xlint:all" />
+      <module name="gwtserializer" options="-Xlint:all" />
+    </option>
+  </component>
+</project>

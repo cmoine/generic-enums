@@ -1,0 +1,15 @@
+sudo: false
+
+language: java
+
+script:
+  - mvn -B -U package
+
+jdk:
+  - openjdk11
+  - openjdk8
+
+branches:
+  only:
+    - master
+    - /^release.*$/
