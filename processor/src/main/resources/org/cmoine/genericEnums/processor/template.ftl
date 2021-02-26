@@ -15,9 +15,11 @@ public class ${className}<${typeElement.genericParameterName}> {
 <#list typeElement.enumConstants as enumConstant>
 <#assign enums = enumConstant.arguments />
 <#assign enums += ['"'+enumConstant.name+'"'] />
+<#assign enums += [enumConstant?index] />
     public static final ${className}<${enumConstant.type}> ${enumConstant.name}=new ${className}<>(${enums?join(', ')});
 </#list>
     private final String __enum_name__;
+    private final int __ordinal__;
 <#list typeElement.fields as field>
     ${field.modifiers} ${field.type} ${field.name};
 </#list>
@@ -25,11 +27,13 @@ public class ${className}<${typeElement.genericParameterName}> {
 <#list typeElement.constructors as constructor>
 <#assign params = constructor.parameters?map(it -> it.type+' '+it.name) />
 <#assign params += ["String __enum_name__"] />
+<#assign params += ["int __ordinal__"] />
         private ${className}(${params?join(', ')}) {
 <#list constructor.statements as statement>
         ${statement}
 </#list>
         this.__enum_name__=__enum_name__;
+        this.__ordinal__=__ordinal__;
     }
 </#list>
 
@@ -56,6 +60,10 @@ public class ${className}<${typeElement.genericParameterName}> {
 
     public String name() {
         return this.__enum_name__;
+    }
+
+    public int ordinal() {
+        return this.__ordinal__;
     }
 
     @Override

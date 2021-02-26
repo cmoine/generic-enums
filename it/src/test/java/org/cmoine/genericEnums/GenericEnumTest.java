@@ -29,6 +29,16 @@ public class GenericEnumTest {
     }
 
     @Test
+    public void testName() {
+        Assert.assertEquals(ENUM_NAME, SimpleGenericEnumExt.ONE.name());
+    }
+
+    @Test
+    public void testOrdinal() {
+        Assert.assertEquals(0, SimpleGenericEnumExt.ONE.ordinal());
+    }
+
+    @Test
     public void testDefaultValue() {
         Assert.assertEquals(0, PrimitiveExt.INT.getDefaultValue().intValue());
     }
