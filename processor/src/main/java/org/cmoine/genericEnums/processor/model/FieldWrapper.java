@@ -1,24 +1,23 @@
 package org.cmoine.genericEnums.processor.model;
 
-import javax.lang.model.element.VariableElement;
-import java.util.stream.Collectors;
+import org.cmoine.genericEnums.GenericEnumParam;
 
-public class FieldWrapper {
-    private final VariableElement element;
+import javax.lang.model.element.VariableElement;
+
+public class FieldWrapper extends ElementWrapper<VariableElement> {
+    private final TypeElementWrapper parent;
 
     public FieldWrapper(TypeElementWrapper parent, VariableElement element) {
-        this.element = element;
+        super(element);
+        this.parent = parent;
     }
 
-    public String getName() {
-        return element.getSimpleName().toString();
-    }
-
+    @Override
     public String getType() {
-        return element.asType().toString();
-    }
-
-    public String getModifiers() {
-        return element.getModifiers().stream().map(it -> it.toString()).collect(Collectors.joining(" "));
+        if(element.getAnnotation(GenericEnumParam.class)!=null) {
+            return parent.getGenericParameterName();
+        } else {
+            return super.getType();
+        }
     }
 }

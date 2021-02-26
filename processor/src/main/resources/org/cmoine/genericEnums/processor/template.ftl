@@ -28,6 +28,14 @@ public class ${className}<${typeElement.genericParameterName}> {
     }
 </#list>
 
+<#list typeElement.methods as method>
+    ${method.modifiers} ${method.returnType} ${method.name}(${method.parameters?map(it -> it.type+' '+it.name)?join(', ')}) {
+<#list method.statements as statement>
+        ${statement}
+</#list>
+    }
+</#list>
+
     public static ${className}[] values() {
         return new ${className}[]{${typeElement.enumConstants?map(it -> it.name)?join(', ')}};
     }

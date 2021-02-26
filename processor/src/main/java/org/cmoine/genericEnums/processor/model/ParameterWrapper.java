@@ -1,15 +1,14 @@
 package org.cmoine.genericEnums.processor.model;
 
 import org.cmoine.genericEnums.GenericEnumParam;
-import org.cmoine.genericEnums.processor.TemplateData;
 
 import javax.lang.model.element.VariableElement;
 
 public class ParameterWrapper {
-    private final ConstructorWrapper parent;
+    private final MethodWrapper parent;
     private final VariableElement symbol;
 
-    public ParameterWrapper(ConstructorWrapper parent, VariableElement symbol) {
+    public ParameterWrapper(MethodWrapper parent, VariableElement symbol) {
         this.parent = parent;
         this.symbol = symbol;
     }

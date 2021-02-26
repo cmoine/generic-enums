@@ -13,9 +13,9 @@ enum Primitive {
     BOOLEAN_OBJECT(Boolean.class, false),
     STRING(String.class, "");
 
-    final Class<?> boxClass;
+    private final Class<?> boxClass;
     @GenericEnumParam
-    final Object defaultValue;
+    private final Object defaultValue;
 
     Primitive(Class<?> boxClass, @GenericEnumParam Object defaultValue) {
        this.boxClass = boxClass;

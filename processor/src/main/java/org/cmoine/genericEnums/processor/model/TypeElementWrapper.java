@@ -1,5 +1,6 @@
 package org.cmoine.genericEnums.processor.model;
 
+import com.sun.source.tree.MethodTree;
 import com.sun.source.util.Trees;
 import org.cmoine.genericEnums.GenericEnum;
 
@@ -30,12 +31,48 @@ public class TypeElementWrapper {
                 .collect(Collectors.toList());
     }
 
-    public List<ConstructorWrapper> getConstructors() {
+    public List<MethodWrapper> getConstructors() {
         return typeElement.getEnclosedElements().stream()
                 .filter(it -> it.getKind().equals(ElementKind.CONSTRUCTOR))
-                .map(it -> new ConstructorWrapper(this, (ExecutableElement) it))
+                .map(it -> new MethodWrapper(this, (ExecutableElement) it, m -> m.getReturnType()==null))
                 .collect(Collectors.toList());
     }
+
+    public List<MethodWrapper> getMethods() {
+        return typeElement.getEnclosedElements().stream()
+                .filter(it -> it.getKind().equals(ElementKind.METHOD))
+                .filter(it -> isValidMethod((ExecutableElement)it))
+                .map(it -> new MethodWrapper(this, (ExecutableElement) it, m -> m.getReturnType()!=null))
+                .filter(it -> it.body!=null)
+                .collect(Collectors.toList());
+    }
+
+    private boolean isValidMethod(ExecutableElement it) {
+        if("values".equals(it.getSimpleName().toString())
+                && it.getParameters().size()==0
+                && it.getModifiers().contains(Modifier.STATIC))
+            return false;
+
+        if("valueOf".equals(it.getSimpleName().toString())
+                && it.getParameters().size()==1
+                // && it.getParameters().get(0).getSimpleName().toString().equals("java.lang.String")
+                && it.getModifiers().contains(Modifier.STATIC))
+            return false;
+
+        return true;
+    }
+
+//    private boolean isValidMethod(MethodTree m) {
+//        if(m.getReturnType()==null)
+//            return false;
+//
+//        if("values".equals(m.getName().toString())
+//                && m.getParameters().size()==0
+//                /*&& m.getModifiers().getFlags().contains(Modifier.STATIC)*/)
+//            return false;
+//
+//        return true;
+//    }
 
     public String getGenericParameterName() {
         return typeElement.getAnnotation(GenericEnum.class).genericTypeName();

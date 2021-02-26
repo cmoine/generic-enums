@@ -2,10 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/annotations/auto-value-annotations.iml" filepath="$PROJECT_DIR$/annotations/auto-value-annotations.iml" />
       <module fileurl="file://$PROJECT_DIR$/it/functional.iml" filepath="$PROJECT_DIR$/it/functional.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/generic-enums.iml" filepath="$PROJECT_DIR$/.idea/generic-enums.iml" />
-      <module fileurl="file://$PROJECT_DIR$/processor/generic-enums (1).iml" filepath="$PROJECT_DIR$/processor/generic-enums (1).iml" />
+      <module fileurl="file://$PROJECT_DIR$/annotations/generic-enums-annotations.iml" filepath="$PROJECT_DIR$/annotations/generic-enums-annotations.iml" />
+      <module fileurl="file://$PROJECT_DIR$/processor/generic-enums-processor.iml" filepath="$PROJECT_DIR$/processor/generic-enums-processor.iml" />
     </modules>
   </component>
 </project>
