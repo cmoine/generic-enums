@@ -13,18 +13,23 @@ import ${generatedType};
 )<#if !generatedTypeAvailable>*/</#if>
 public class ${className}<${typeElement.genericParameterName}> {
 <#list typeElement.enumConstants as enumConstant>
-    public static final ${className}<${enumConstant.type}> ${enumConstant.name}=new ${className}<>(${enumConstant.arguments?join(', ')});
+<#assign enums = enumConstant.arguments />
+<#assign enums += ['"'+enumConstant.name+'"'] />
+    public static final ${className}<${enumConstant.type}> ${enumConstant.name}=new ${className}<>(${enums?join(', ')});
 </#list>
-
+    private final String __enum_name__;
 <#list typeElement.fields as field>
-        ${field.modifiers} ${field.type} ${field.name};
+    ${field.modifiers} ${field.type} ${field.name};
 </#list>
 
 <#list typeElement.constructors as constructor>
-    private ${className}(${constructor.parameters?map(it -> it.type+' '+it.name)?join(', ')}) {
+<#assign params = constructor.parameters?map(it -> it.type+' '+it.name) />
+<#assign params += ["String __enum_name__"] />
+        private ${className}(${params?join(', ')}) {
 <#list constructor.statements as statement>
         ${statement}
 </#list>
+        this.__enum_name__=__enum_name__;
     }
 </#list>
 
@@ -38,5 +43,23 @@ public class ${className}<${typeElement.genericParameterName}> {
 
     public static ${className}[] values() {
         return new ${className}[]{${typeElement.enumConstants?map(it -> it.name)?join(', ')}};
+    }
+
+    public static ${className} valueOf(String name) {
+<#list typeElement.enumConstants as enumConstant>
+        if("${enumConstant.name}".equals(name)) {
+            return ${enumConstant.name};
+        }
+</#list>
+        throw new IllegalArgumentException("No enum constant ${packageName}.${className}."+name);
+    }
+
+    public String name() {
+        return this.__enum_name__;
+    }
+
+    @Override
+    public String toString() {
+        return name();
     }
 }

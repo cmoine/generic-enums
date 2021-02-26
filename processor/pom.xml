@@ -25,7 +25,7 @@
   </parent>
 
   <groupId>org.cmoine</groupId>
-  <artifactId>generic-enums</artifactId>
+  <artifactId>generic-enums-processor</artifactId>
   <version>HEAD-SNAPSHOT</version>
   <name>GenericEnums Processor</name>
   <description>

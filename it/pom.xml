@@ -42,7 +42,7 @@
     </dependency>
     <dependency>
       <groupId>org.cmoine</groupId>
-      <artifactId>generic-enums</artifactId>
+      <artifactId>generic-enums-processor</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -135,6 +135,10 @@
           </compilerArgs>
           <showWarnings>true</showWarnings>
           <showDeprecation>true</showDeprecation>
+          <!-- See https://www.programmersought.com/article/84835195071/ -->
+          <!-- <compilerArguments>
+            <bootclasspath>${java.home}/lib/rt.jar${path.separator}${java.home}/lib/jce.jar${path.separator}${java.home}/../lib/tools.jar</bootclasspath>
+          </compilerArguments> -->
           <testExcludes>
             <exclude>${exclude.tests}</exclude>
           </testExcludes>
