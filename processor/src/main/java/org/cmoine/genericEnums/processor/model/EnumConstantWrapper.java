@@ -28,6 +28,8 @@ public class EnumConstantWrapper {
         @Override
         public Object visitVariable(VariableTree variableTree, Trees trees) {
             if (variableTree.getName().toString().equals(this.fieldName)) {
+                if(fieldInitializer!=null)
+                    throw new InternalError("Several matches");
                 this.fieldInitializer = variableTree.getInitializer();
             }
 

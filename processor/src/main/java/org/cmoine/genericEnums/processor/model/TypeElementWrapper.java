@@ -1,6 +1,5 @@
 package org.cmoine.genericEnums.processor.model;
 
-import com.sun.source.tree.MethodTree;
 import com.sun.source.util.Trees;
 import org.cmoine.genericEnums.GenericEnum;
 
@@ -11,6 +10,19 @@ import java.util.stream.Collectors;
 public class TypeElementWrapper {
     final Trees trees;
     private final TypeElement typeElement;
+//
+//    private static class FunctionMatcher implements Predicate<MethodTree> {
+//        private final ExecutableElement element;
+//
+//        public FunctionMatcher(ExecutableElement element) {
+//            this.element = element;
+//        }
+//
+//        @Override
+//        public boolean test(MethodTree methodTree) {
+//            return false;
+//        }
+//    }
 
     public TypeElementWrapper(Trees trees, TypeElement typeElement) {
         this.trees = trees;
@@ -31,19 +43,19 @@ public class TypeElementWrapper {
                 .collect(Collectors.toList());
     }
 
-    public List<MethodWrapper> getConstructors() {
+    public List<ExecutableElementWrapper> getConstructors() {
         return typeElement.getEnclosedElements().stream()
                 .filter(it -> it.getKind().equals(ElementKind.CONSTRUCTOR))
-                .map(it -> new MethodWrapper(this, (ExecutableElement) it, m -> m.getReturnType()==null))
+                .map(it -> new ConstructorWrapper(this, (ExecutableElement) it))
                 .collect(Collectors.toList());
     }
 
-    public List<MethodWrapper> getMethods() {
+    public List<ExecutableElementWrapper> getMethods() {
         return typeElement.getEnclosedElements().stream()
                 .filter(it -> it.getKind().equals(ElementKind.METHOD))
                 .filter(it -> isValidMethod((ExecutableElement)it))
-                .map(it -> new MethodWrapper(this, (ExecutableElement) it, m -> m.getReturnType()!=null))
-                .filter(it -> it.body!=null)
+                .map(it -> new MethodWrapper(this, (ExecutableElement) it))
+                .filter(it -> it.methodTree!=null)
                 .collect(Collectors.toList());
     }
 

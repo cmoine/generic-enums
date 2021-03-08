@@ -5,10 +5,10 @@ import org.cmoine.genericEnums.GenericEnumParam;
 import javax.lang.model.element.VariableElement;
 
 public class ParameterWrapper {
-    private final MethodWrapper parent;
+    private final ExecutableElementWrapper parent;
     private final VariableElement symbol;
 
-    public ParameterWrapper(MethodWrapper parent, VariableElement symbol) {
+    public ParameterWrapper(ExecutableElementWrapper parent, VariableElement symbol) {
         this.parent = parent;
         this.symbol = symbol;
     }

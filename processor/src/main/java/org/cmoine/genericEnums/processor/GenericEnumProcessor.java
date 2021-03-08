@@ -1,7 +1,5 @@
 package org.cmoine.genericEnums.processor;
 
-// import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.google.auto.service.AutoService;
 import com.google.common.collect.Maps;
 import com.sun.source.util.Trees;

@@ -28,12 +28,21 @@ public class ${className}<${typeElement.genericParameterName}> {
 <#assign params = constructor.parameters?map(it -> it.type+' '+it.name) />
 <#assign params += ["String __enum_name__"] />
 <#assign params += ["int __ordinal__"] />
-        private ${className}(${params?join(', ')}) {
+    private ${className}(${params?join(', ')}) {
 <#list constructor.statements as statement>
+<#if statement?index==0 && constructor.thisInitializer??>
+<#assign args = constructor.thisInitializer.arguments />
+<#assign args += ["__enum_name__"] />
+<#assign args += ["__ordinal__"] />
+        this(${args?join(', ')});
+<#else>
         ${statement}
+</#if>
 </#list>
+<#if !constructor.thisInitializer??>
         this.__enum_name__=__enum_name__;
         this.__ordinal__=__ordinal__;
+</#if>
     }
 </#list>
 

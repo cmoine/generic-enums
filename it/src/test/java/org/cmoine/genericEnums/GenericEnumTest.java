@@ -42,4 +42,10 @@ public class GenericEnumTest {
     public void testDefaultValue() {
         Assert.assertEquals(0, PrimitiveExt.INT.getDefaultValue().intValue());
     }
+
+    @Test
+    public void testPolymorphicConstructor() {
+        Assert.assertEquals(0, PolymorphicConstructorEnumExt.ONE_PARAM.get_default());
+        Assert.assertEquals(1, PolymorphicConstructorEnumExt.TWO_PARAM.get_default());
+    }
 }
