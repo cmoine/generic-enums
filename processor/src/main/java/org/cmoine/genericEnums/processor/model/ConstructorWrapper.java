@@ -5,7 +5,6 @@ import com.sun.tools.javac.tree.JCTree;
 
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
-import java.util.List;
 
 public class ConstructorWrapper extends ExecutableElementWrapper {
     private final JCTree.JCMethodInvocation thisInitializer;
@@ -27,20 +26,15 @@ public class ConstructorWrapper extends ExecutableElementWrapper {
         if(!(firstStatement instanceof JCTree.JCExpressionStatement))
             return null;
 
-        System.out.println("1"+firstStatement);
-
         JCTree.JCExpression expr = ((JCTree.JCExpressionStatement) methodTree.getBody().getStatements().get(0)).expr;
         if(!(expr instanceof JCTree.JCMethodInvocation))
             return null;
-
-        System.out.println("2"+expr);
 
         JCTree.JCMethodInvocation jcMethodInvocation = (JCTree.JCMethodInvocation) expr;
         if(!jcMethodInvocation.toString().startsWith("this"))
             return null;
 
         return jcMethodInvocation;
-        // System.out.println(((JCTree.JCMethodInvocation)expr).getTree().getClass());
     }
 
     public JCTree.JCMethodInvocation getThisInitializer() {

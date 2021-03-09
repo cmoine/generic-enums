@@ -1,6 +1,7 @@
 package org.cmoine.genericEnums.processor.model;
 
 import com.google.common.primitives.Primitives;
+import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.VariableTree;
@@ -12,25 +13,22 @@ import com.sun.tools.javac.tree.JCTree;
 import javax.lang.model.element.VariableElement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class EnumConstantWrapper {
     final TypeElementWrapper parent;
     private final VariableElement symbol;
     private final List<ArgumentWrapper> arguments;
+    private VariableTree variableDecl;
+    private final NewClassTree fieldInitializer;
 
     // https://stackoverflow.com/questions/6373145/accessing-source-code-from-java-annotation-processor
-    private static class CodeAnalyzerTreeScanner extends TreePathScanner<Object, Trees> {
-        private String fieldName;
-
-        private ExpressionTree fieldInitializer;
-
+    private class CodeAnalyzerTreeScanner extends TreePathScanner<Object, Trees> {
         @Override
         public Object visitVariable(VariableTree variableTree, Trees trees) {
-            if (variableTree.getName().toString().equals(this.fieldName)) {
-                if(fieldInitializer!=null)
+            if (variableTree.getName().toString().equals(getName())) {
+                if(variableDecl!=null)
                     throw new InternalError("Several matches");
-                this.fieldInitializer = variableTree.getInitializer();
+                variableDecl = variableTree;
             }
 
             return super.visitVariable(variableTree, trees);
@@ -43,9 +41,8 @@ public class EnumConstantWrapper {
         CodeAnalyzerTreeScanner codeScanner = new CodeAnalyzerTreeScanner();
         TreePath tp = parent.trees.getPath(symbol.getEnclosingElement());
 
-        codeScanner.fieldName=getName();
         codeScanner.scan(tp, parent.trees);
-        NewClassTree fieldInitializer = (NewClassTree) codeScanner.fieldInitializer;
+        fieldInitializer = (NewClassTree) variableDecl.getInitializer();
         arguments = new ArrayList<>(fieldInitializer.getArguments().size());
         List<? extends ExpressionTree> fieldInitializerArguments = fieldInitializer.getArguments();
         for (int i = 0; i < fieldInitializerArguments.size(); i++) {
@@ -63,7 +60,6 @@ public class EnumConstantWrapper {
     }
 
     public String getType() {
-        // return Primitives.allPrimitiveTypes().stream().map(Objects::toString).collect(Collectors.joining(", "));
         String type = arguments.stream()
                 .filter(it -> it.isClass)
                 .map(it -> ((JCTree.JCFieldAccess) it.expr).selected.toString())
@@ -75,5 +71,9 @@ public class EnumConstantWrapper {
             }
         }
         return type;
+    }
+
+    public ClassTree getClassBody() {
+        return fieldInitializer.getClassBody();
     }
 }

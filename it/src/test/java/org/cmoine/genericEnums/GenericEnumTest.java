@@ -48,4 +48,10 @@ public class GenericEnumTest {
         Assert.assertEquals(0, PolymorphicConstructorEnumExt.ONE_PARAM.get_default());
         Assert.assertEquals(1, PolymorphicConstructorEnumExt.TWO_PARAM.get_default());
     }
+
+    @Test
+    public void testAbstractEnum() {
+//        Assert.assertEquals(0, AbstractEnumExt.ONE.getValue());
+//        Assert.assertEquals(1, PolymorphicConstructorEnumExt.TWO_PARAM.get_default());
+    }
 }

@@ -10,19 +10,6 @@ import java.util.stream.Collectors;
 public class TypeElementWrapper {
     final Trees trees;
     private final TypeElement typeElement;
-//
-//    private static class FunctionMatcher implements Predicate<MethodTree> {
-//        private final ExecutableElement element;
-//
-//        public FunctionMatcher(ExecutableElement element) {
-//            this.element = element;
-//        }
-//
-//        @Override
-//        public boolean test(MethodTree methodTree) {
-//            return false;
-//        }
-//    }
 
     public TypeElementWrapper(Trees trees, TypeElement typeElement) {
         this.trees = trees;
@@ -43,14 +30,14 @@ public class TypeElementWrapper {
                 .collect(Collectors.toList());
     }
 
-    public List<ExecutableElementWrapper> getConstructors() {
+    public List<ConstructorWrapper> getConstructors() {
         return typeElement.getEnclosedElements().stream()
                 .filter(it -> it.getKind().equals(ElementKind.CONSTRUCTOR))
                 .map(it -> new ConstructorWrapper(this, (ExecutableElement) it))
                 .collect(Collectors.toList());
     }
 
-    public List<ExecutableElementWrapper> getMethods() {
+    public List<MethodWrapper> getMethods() {
         return typeElement.getEnclosedElements().stream()
                 .filter(it -> it.getKind().equals(ElementKind.METHOD))
                 .filter(it -> isValidMethod((ExecutableElement)it))
@@ -74,17 +61,9 @@ public class TypeElementWrapper {
         return true;
     }
 
-//    private boolean isValidMethod(MethodTree m) {
-//        if(m.getReturnType()==null)
-//            return false;
-//
-//        if("values".equals(m.getName().toString())
-//                && m.getParameters().size()==0
-//                /*&& m.getModifiers().getFlags().contains(Modifier.STATIC)*/)
-//            return false;
-//
-//        return true;
-//    }
+    public boolean isAbstract() {
+        return getMethods().stream().anyMatch(it -> it.isAbstract());
+    }
 
     public String getGenericParameterName() {
         return typeElement.getAnnotation(GenericEnum.class).genericTypeName();

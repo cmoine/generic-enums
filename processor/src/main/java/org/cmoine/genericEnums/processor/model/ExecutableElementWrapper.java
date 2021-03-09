@@ -1,6 +1,8 @@
 package org.cmoine.genericEnums.processor.model;
 
-import com.sun.source.tree.*;
+import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.StatementTree;
+import com.sun.source.tree.Tree;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.TreePathScanner;
 import com.sun.source.util.Trees;
@@ -9,10 +11,7 @@ import org.cmoine.genericEnums.GenericEnumParam;
 
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.type.TypeMirror;
 import java.util.List;
-import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public abstract class ExecutableElementWrapper extends ElementWrapper<ExecutableElement> {
@@ -32,6 +31,9 @@ public abstract class ExecutableElementWrapper extends ElementWrapper<Executable
         }
 
         private boolean test(MethodTree node) {
+            if(((JCTree.JCMethodDecl)node).sym!=element)
+                return false;
+
             boolean isMethod = (node.getKind() == Tree.Kind.METHOD) && node.getReturnType()!=null;
             boolean isConstructor = (node.getKind() == Tree.Kind.METHOD) && node.getReturnType()==null;
             boolean isMethod2 = element.getKind() == ElementKind.METHOD;

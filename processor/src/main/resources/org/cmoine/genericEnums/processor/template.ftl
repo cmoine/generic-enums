@@ -11,12 +11,16 @@ import ${generatedType};
     date = "${.now?string("yyyy-MM-dd'T'HH:mm:ssZ")}",
     comments = "version: ${version!"[N/A]"}, compiler: javac, environment: Java ${runtimeVersion} (${runtimeVendor})"
 )<#if !generatedTypeAvailable>*/</#if>
-public class ${className}<${typeElement.genericParameterName}> {
+public <#if typeElement.abstract>abstract </#if>class ${className}<${typeElement.genericParameterName}> {
 <#list typeElement.enumConstants as enumConstant>
 <#assign enums = enumConstant.arguments />
 <#assign enums += ['"'+enumConstant.name+'"'] />
 <#assign enums += [enumConstant?index] />
-    public static final ${className}<${enumConstant.type}> ${enumConstant.name}=new ${className}<>(${enums?join(', ')});
+    public static final ${className}<${enumConstant.type}> ${enumConstant.name}=new ${className}<>(${enums?join(', ')})<#if enumConstant.classBody??> {
+<#list enumConstant.classBody.members as member>
+<#list member?split('\n') as line>${line}</#list>
+</#list>
+        }</#if>;
 </#list>
     private final String __enum_name__;
     private final int __ordinal__;
@@ -47,11 +51,11 @@ public class ${className}<${typeElement.genericParameterName}> {
 </#list>
 
 <#list typeElement.methods as method>
-    ${method.modifiers} ${method.returnType} ${method.name}(${method.parameters?map(it -> it.type+' '+it.name)?join(', ')}) {
+    ${method.modifiers} ${method.returnType} ${method.name}(${method.parameters?map(it -> it.type+' '+it.name)?join(', ')}) <#if method.abstract>;<#else> {
 <#list method.statements as statement>
         ${statement}
 </#list>
-    }
+    }</#if>
 </#list>
 
     public static ${className}[] values() {
