@@ -1,7 +1,6 @@
 package org.cmoine.genericEnums.processor.model;
 
 import com.google.common.primitives.Primitives;
-import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.VariableTree;
@@ -13,7 +12,12 @@ import com.sun.tools.javac.tree.JCTree;
 import javax.lang.model.element.VariableElement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+/**
+ * @deprecated Replaced by {@link EnumConstantTreeWrapper}
+ */
+@Deprecated
 public class EnumConstantWrapper {
     final TypeElementWrapper parent;
     private final VariableElement symbol;
@@ -47,7 +51,7 @@ public class EnumConstantWrapper {
         List<? extends ExpressionTree> fieldInitializerArguments = fieldInitializer.getArguments();
         for (int i = 0; i < fieldInitializerArguments.size(); i++) {
             ExpressionTree et = fieldInitializerArguments.get(i);
-            arguments.add(new ArgumentWrapper(this, et, i));
+            arguments.add(new ArgumentWrapper(et, i));
         }
     }
 
@@ -59,21 +63,23 @@ public class EnumConstantWrapper {
         return arguments;
     }
 
-    public String getType() {
-        String type = arguments.stream()
+    public List<String> getTypes() {
+        return arguments.stream()
                 .filter(it -> it.isClass)
                 .map(it -> ((JCTree.JCFieldAccess) it.expr).selected.toString())
-                .findFirst().orElseThrow(IllegalArgumentException::new);
-        // Handle primitive types
-        for(Class<?> clazz: Primitives.allPrimitiveTypes()) {
-            if(clazz.toString().equals(type)) {
-                return Primitives.wrap(clazz).getSimpleName();
-            }
-        }
-        return type;
+                .map(type -> {
+                    // Handle primitive types
+                    for(Class<?> clazz: Primitives.allPrimitiveTypes()) {
+                        if(clazz.toString().equals(type)) {
+                            return Primitives.wrap(clazz).getSimpleName();
+                        }
+                    }
+                    return type;
+                })
+                .collect(Collectors.toList());
     }
 
-    public ClassTree getClassBody() {
-        return fieldInitializer.getClassBody();
+    public ClassBodyTreeWrapper getClassBody() {
+        return null; // fieldInitializer.getClassBody()==null ? null : new ClassBodyTreeWrapper(parent, fieldInitializer.getClassBody());
     }
 }

@@ -13,7 +13,10 @@ import org.cmoine.genericEnums.processor.model.TypeElementWrapper;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.*;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
@@ -61,6 +64,7 @@ public class GenericEnumProcessor extends AbstractProcessor {
                 Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
                 cfg.setClassLoaderForTemplateLoading(getClass().getClassLoader(),
                         getClass().getPackage().getName().replace('.', '/'));
+                cfg.setSharedVariable("instanceOf", new InstanceOfMethod());
                 Template template = cfg.getTemplate("template.ftl");
                 template.createProcessingEnvironment(new TemplateData(getClass(),
                         processingEnv, pkgName, className, new TypeElementWrapper(trees, typeElement)), writer).process();
@@ -84,38 +88,10 @@ public class GenericEnumProcessor extends AbstractProcessor {
             children.addAll(executableElement.getTypeParameters());
             children.addAll(executableElement.getParameters());
         }
-//        if (element instanceof Symbol) {
-//            Symbol symbol = (Symbol) element;
-//            attributes.put("type", symbol.type);
-            if (element instanceof VariableElement) {
-                VariableElement varSymbol = (VariableElement) element;
-//                attributes.put("declarationAttributes", varSymbol.getDeclarationAttributes());
-//                attributes.put("rawAttributes", varSymbol.getRawAttributes());
-//                attributes.put("classInitTypeAttributes", varSymbol.getClassInitTypeAttributes());
-//                attributes.put("constValue", varSymbol.getConstValue());
-                // attributes.put("type", varSymbol.getTypeParameters());
-                // if(varSymbol.getConstantValue()!=null)
-                attributes.put("constantValue", varSymbol.getConstantValue());
-//                if(ElementKind.ENUM_CONSTANT.equals(element.getKind())) {
-//                    CodeAnalyzerTreeScanner codeScanner = new CodeAnalyzerTreeScanner();
-//                    TreePath tp = this.trees.getPath(varSymbol.getEnclosingElement());
-//
-//                    codeScanner.setFieldName(element.getSimpleName().toString());
-//                    codeScanner.scan(tp, this.trees);
-//                    String fieldInitializer = ((NewClassTree)codeScanner.getFieldInitializer()).getArguments();
-//                    attributes.put("fieldInitializer", fieldInitializer);
-//                }
-//                Type type = varSymbol.asType();
-//                if(type!=null) {
-//                    Element typeElement = processingEnv.getTypeUtils().asElement(type);
-//                    if(typeElement!=null)
-//                        children.add(typeElement);
-//                }
-//            } else if (symbol instanceof MethodSymbol) {
-//                Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) symbol;
-//                children.addAll(methodSymbol.getParameters());
-            }
-//        }
+        if (element instanceof VariableElement) {
+            VariableElement varSymbol = (VariableElement) element;
+            attributes.put("constantValue", varSymbol.getConstantValue());
+        }
 
         System.out.println(new String(tabs)
                 + element.getClass().getSimpleName()
@@ -126,24 +102,6 @@ public class GenericEnumProcessor extends AbstractProcessor {
                 .collect(Collectors.joining(", ")) + ")");
         children.forEach(child -> dump(child, tabCount + 1));
     }
-
-//    private Map<String, Object> getAttributes(Element element) {
-//        Map<String, Object> map=new TreeMap<>();
-//        map.put("simpleName", element.getSimpleName());
-//        if(element instanceof Symbol) {
-//            map.put("type", ((Symbol) element).type);
-//            chi
-//        }
-//        return map;
-//    }
-//
-//    private List<? extends Element> children(Element element) {
-//        if(element instanceof Symbol.MethodSymbol) {
-//            return ((Symbol.MethodSymbol)element).getParameters();
-//        }
-//
-//        return element.getEnclosedElements();
-//    }
 
     private void print(Exception e) {
         StringWriter stringWriter = new StringWriter();

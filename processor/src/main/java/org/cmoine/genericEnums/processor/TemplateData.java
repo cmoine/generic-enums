@@ -2,15 +2,14 @@ package org.cmoine.genericEnums.processor;
 
 import org.cmoine.genericEnums.processor.model.TypeElementWrapper;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.jar.Manifest;
-
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.util.Elements;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.jar.Manifest;
 
 public class TemplateData {
     private final TypeElementWrapper typeElement;

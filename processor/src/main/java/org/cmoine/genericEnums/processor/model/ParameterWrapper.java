@@ -4,6 +4,10 @@ import org.cmoine.genericEnums.GenericEnumParam;
 
 import javax.lang.model.element.VariableElement;
 
+/**
+ * @deprecated Replaced by {@link ParameterTreeWrapper}
+ */
+@Deprecated
 public class ParameterWrapper {
     private final ExecutableElementWrapper parent;
     private final VariableElement symbol;
@@ -18,8 +22,9 @@ public class ParameterWrapper {
     }
 
     public String getType() {
-        if(symbol.getAnnotation(GenericEnumParam.class)!=null) {
-            return parent.parent.getGenericParameterName();
+        GenericEnumParam annotation = symbol.getAnnotation(GenericEnumParam.class);
+        if(annotation !=null) {
+            return annotation.value();
         } else {
             return symbol.asType().toString();
         }

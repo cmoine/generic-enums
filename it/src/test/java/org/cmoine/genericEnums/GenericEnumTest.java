@@ -8,6 +8,11 @@ public class GenericEnumTest {
     public static final String NON_EXISTENT_ENUM_NAME = "NON_EXISTENT";
 
     @Test
+    public void test() {
+        Assert.assertEquals(String.class, Argument.STRING.getClazz());
+    }
+
+    @Test
     public void testValues() {
         Assert.assertEquals(SimpleGenericEnum.values().length, SimpleGenericEnumExt.values().length);
     }
@@ -51,7 +56,7 @@ public class GenericEnumTest {
 
     @Test
     public void testAbstractEnum() {
-//        Assert.assertEquals(0, AbstractEnumExt.ONE.getValue());
-//        Assert.assertEquals(1, PolymorphicConstructorEnumExt.TWO_PARAM.get_default());
+        Assert.assertEquals(1, AbstractEnumExt.ONE.getValue().intValue());
+        Assert.assertEquals(2.0, AbstractEnumExt.TWO.getValue().doubleValue(), 0.01);
     }
 }

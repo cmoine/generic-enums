@@ -17,9 +17,9 @@ public enum AbstractEnum {
         }
     };
 
-    AbstractEnum(Class<?> clazz) {
+    AbstractEnum(Class clazz) {
     }
 
-    @GenericEnumParam
+    @GenericEnumParam("T")
     public abstract Object getValue();
 }

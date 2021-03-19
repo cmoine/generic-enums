@@ -11,24 +11,33 @@ import ${generatedType};
     date = "${.now?string("yyyy-MM-dd'T'HH:mm:ssZ")}",
     comments = "version: ${version!"[N/A]"}, compiler: javac, environment: Java ${runtimeVersion} (${runtimeVendor})"
 )<#if !generatedTypeAvailable>*/</#if>
-public <#if typeElement.abstract>abstract </#if>class ${className}<${typeElement.genericParameterName}> {
-<#list typeElement.enumConstants as enumConstant>
+public <#if typeElement.abstract>abstract </#if>class ${className}<${typeElement.genericParameterNames?join(', ')}> <#if typeElement.interfaces?has_content>implements ${typeElement.interfaces?join(', ')}</#if>{
+<#list typeElement.enumConstantTree as enumConstant>
 <#assign enums = enumConstant.arguments />
 <#assign enums += ['"'+enumConstant.name+'"'] />
 <#assign enums += [enumConstant?index] />
-    public static final ${className}<${enumConstant.type}> ${enumConstant.name}=new ${className}<>(${enums?join(', ')})<#if enumConstant.classBody??> {
+    public static final ${className}<${enumConstant.types?join(', ')}> ${enumConstant.name}=new ${className}<${enumConstant.types?join(', ')}>(${enums?join(', ')})<#if enumConstant.classBody??> {
 <#list enumConstant.classBody.members as member>
-<#list member?split('\n') as line>${line}</#list>
+<#list member?split('\n') as line>            ${line}</#list>${instanceOf(member, 'com.sun.source.tree.VariableTree')?then(';', '')}
+</#list>
+<#list enumConstant.classBody.fields as field>
+<#assign pad="            "/>
+<#include "fieldTree.ftl"/>
+</#list>
+<#list enumConstant.classBody.methods as method>
+<#assign pad="            "/>
+<#include "methodTree.ftl"/>
 </#list>
         }</#if>;
 </#list>
     private final String __enum_name__;
     private final int __ordinal__;
-<#list typeElement.fields as field>
-    ${field.modifiers} ${field.type} ${field.name};
+<#list typeElement.fieldTree as field>
+<#assign pad="    "/>
+<#include "fieldTree.ftl"/>
 </#list>
 
-<#list typeElement.constructors as constructor>
+<#list typeElement.constructorTree as constructor>
 <#assign params = constructor.parameters?map(it -> it.type+' '+it.name) />
 <#assign params += ["String __enum_name__"] />
 <#assign params += ["int __ordinal__"] />
@@ -50,12 +59,9 @@ public <#if typeElement.abstract>abstract </#if>class ${className}<${typeElement
     }
 </#list>
 
-<#list typeElement.methods as method>
-    ${method.modifiers} ${method.returnType} ${method.name}(${method.parameters?map(it -> it.type+' '+it.name)?join(', ')}) <#if method.abstract>;<#else> {
-<#list method.statements as statement>
-        ${statement}
-</#list>
-    }</#if>
+<#list typeElement.methodTree as method>
+<#assign pad="    "/>
+<#include "methodTree.ftl"/>
 </#list>
 
     public static ${className}[] values() {

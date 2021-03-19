@@ -1,7 +1,6 @@
 package org.cmoine.genericEnums.processor.model;
 
 import com.sun.source.tree.MethodTree;
-import com.sun.source.tree.StatementTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.TreePathScanner;
@@ -14,6 +13,10 @@ import javax.lang.model.element.ExecutableElement;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * @deprecated Replaced by {@link AbstractMethodTreeWrapper}
+ */
+@Deprecated
 public abstract class ExecutableElementWrapper extends ElementWrapper<ExecutableElement> {
     final TypeElementWrapper parent;
     MethodTree methodTree;
@@ -53,6 +56,12 @@ public abstract class ExecutableElementWrapper extends ElementWrapper<Executable
         super(element);
         this.parent = parent;
         CodeAnalyzerTreeScanner codeScanner = new CodeAnalyzerTreeScanner();
+        if(parent==null)
+            throw new NullPointerException();
+        if(parent.trees==null)
+            throw new NullPointerException();
+        if(element==null)
+            throw new NullPointerException();
         TreePath tp = parent.trees.getPath(element.getEnclosingElement());
 
         codeScanner.scan(tp, parent.trees);
@@ -64,13 +73,14 @@ public abstract class ExecutableElementWrapper extends ElementWrapper<Executable
                 .collect(Collectors.toList());
     }
 
-    public List<? extends StatementTree> getStatements() {
+    public List<?> getStatements() {
         return methodTree.getBody().getStatements();
     }
 
     public String getReturnType() {
-        if(element.getAnnotation(GenericEnumParam.class)!=null) {
-            return parent.getGenericParameterName();
+        GenericEnumParam annotation = element.getAnnotation(GenericEnumParam.class);
+        if(annotation !=null) {
+            return annotation.value();
         } else {
             return element.getReturnType().toString();
         }

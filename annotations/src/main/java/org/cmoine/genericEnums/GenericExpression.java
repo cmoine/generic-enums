@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
-@Target(ElementType.TYPE)
-public @interface GenericEnum {
-    String name() default "%Ext";
+@Target(ElementType.METHOD)
+public @interface GenericExpression {
+    String expr();
 }

@@ -4,6 +4,10 @@ import org.cmoine.genericEnums.GenericEnumParam;
 
 import javax.lang.model.element.VariableElement;
 
+/**
+ * @deprecated Replaced by {@link FieldTreeWrapper}
+ */
+@Deprecated
 public class FieldWrapper extends ElementWrapper<VariableElement> {
     private final TypeElementWrapper parent;
 
@@ -14,8 +18,9 @@ public class FieldWrapper extends ElementWrapper<VariableElement> {
 
     @Override
     public String getType() {
-        if(element.getAnnotation(GenericEnumParam.class)!=null) {
-            return parent.getGenericParameterName();
+        GenericEnumParam annotation = element.getAnnotation(GenericEnumParam.class);
+        if(annotation !=null) {
+            return annotation.value();
         } else {
             return super.getType();
         }
