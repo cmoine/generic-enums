@@ -1,34 +1,31 @@
 package org.cmoine.genericEnums.processor.model;
 
 import com.google.common.collect.ImmutableList;
-import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.MethodTree;
-import com.sun.source.tree.Tree;
-import com.sun.source.tree.VariableTree;
+import com.sun.source.tree.*;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.TreePathScanner;
 import com.sun.source.util.Trees;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.tree.JCTree;
 
-import javax.lang.model.element.*;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 public class TypeElementWrapper {
-    final Trees trees;
+//    final Trees trees;
     private final TypeElement typeElement;
-    private final List<ConstructorWrapper> constructors;
-    private final List<EnumConstantWrapper> enumConstants;
     private final List<EnumConstantTreeWrapper> enumConstantTree;
-    private final List<FieldWrapper> fields;
-    private final List<MethodWrapper> methods;
     private final Set<String> genericParameterNames;
     private final List<MethodTreeWrapper> methodTree;
     private final List<ConstructorTreeWrapper> constructorTree;
     private final List<FieldTreeWrapper> fieldTree;
+    CompilationUnitTree compilationUnitTree;
     ClassTree classTree;
 
     // https://stackoverflow.com/questions/6373145/accessing-source-code-from-java-annotation-processor
@@ -37,7 +34,7 @@ public class TypeElementWrapper {
         public Object visitClass(ClassTree node, Trees trees) {
             if(node.getSimpleName().equals(typeElement.getSimpleName())) {
                 if(classTree!=null)
-                    throw new InternalError("Several matches:\n"+classTree+"\nAND\n"+node);
+                    throw new IllegalArgumentException("Several matches:\n"+classTree+"\nAND\n"+node);
                 classTree=node;
             }
             return super.visitClass(node, trees);
@@ -45,58 +42,21 @@ public class TypeElementWrapper {
     }
 
     public TypeElementWrapper(Trees trees, TypeElement typeElement) {
-        this.trees = trees;
+//        this.trees = trees;
         this.typeElement = typeElement;
 
         CodeAnalyzerTreeScanner codeScanner = new CodeAnalyzerTreeScanner();
         TreePath tp = trees.getPath(typeElement);
+        compilationUnitTree = tp.getCompilationUnit();
         codeScanner.scan(tp, trees);
         if(classTree==null)
             throw new NullPointerException();
 
-        ImmutableList.Builder<ConstructorWrapper> constructorBuilder=ImmutableList.builder();
-        ImmutableList.Builder<EnumConstantWrapper> enumConstantBuilder=ImmutableList.builder();
-        ImmutableList.Builder<FieldWrapper> fieldsBuilder=ImmutableList.builder();
-        ImmutableList.Builder<MethodWrapper> methodsBuilder=ImmutableList.builder();
         ImmutableList.Builder<MethodTreeWrapper> methodTreeBuilder=ImmutableList.builder();
         ImmutableList.Builder<ConstructorTreeWrapper> constructorTreeBuilder=ImmutableList.builder();
         ImmutableList.Builder<EnumConstantTreeWrapper> enumConstantTreeBuilder=ImmutableList.builder();
         ImmutableList.Builder<FieldTreeWrapper> fieldTreeBuilder=ImmutableList.builder();
         Set<String> genericParameterNames=null;
-        for(Element element: typeElement.getEnclosedElements()) {
-            switch(element.getKind()) {
-                case ENUM_CONSTANT: {
-                    enumConstantBuilder.add(new EnumConstantWrapper(this, (VariableElement) element));
-                    break;
-                }
-                case FIELD: {
-                    fieldsBuilder.add(new FieldWrapper(this, (VariableElement) element));
-                    break;
-                }
-                case CONSTRUCTOR: {
-//                    ConstructorWrapper constructorWrapper = new ConstructorWrapper(this, (ExecutableElement) element);
-//                    if(genericParameters==null) {
-//                        genericParameters=constructorWrapper.getGenericParameters();
-//                    } else {
-//                        String genericParameterNames = toString(genericParameters);
-//                        String newGenericParameterNames = toString(constructorWrapper.getGenericParameters());
-//                        if(!genericParameterNames.equals(newGenericParameterNames)) {
-//                            throw new IllegalArgumentException("All constructors must have the same generic parameters: "+genericParameterNames+"<>"+newGenericParameterNames+"(class="+typeElement.getQualifiedName()+")");
-//                        }
-//                    }
-//                    constructorBuilder.add(constructorWrapper);
-                    break;
-                }
-                case METHOD: {
-                    if(isValidMethod((ExecutableElement)element)) {
-                        MethodWrapper methodWrapper = new MethodWrapper(this, (ExecutableElement) element);
-                        if(methodWrapper.methodTree!=null) {
-                            methodsBuilder.add(methodWrapper);
-                        }
-                    }
-                }
-            }
-        }
         for(Tree tree: classTree.getMembers()) {
             if(tree instanceof MethodTree) {
                 JCTree.JCMethodDecl methodDecl= (JCTree.JCMethodDecl) tree;
@@ -129,12 +89,8 @@ public class TypeElementWrapper {
                 }
             }
         }
-        constructors=constructorBuilder.build();
         constructorTree=constructorTreeBuilder.build();
-        enumConstants=enumConstantBuilder.build();
         enumConstantTree=enumConstantTreeBuilder.build();
-        fields=fieldsBuilder.build();
-        methods=methodsBuilder.build();
         methodTree=methodTreeBuilder.build();
         fieldTree=fieldTreeBuilder.build();
         if(genericParameterNames.isEmpty()) {
@@ -147,24 +103,8 @@ public class TypeElementWrapper {
         return parameters.stream().collect(Collectors.joining(", "));
     }
 
-    public List<EnumConstantWrapper> getEnumConstants() {
-        return enumConstants;
-    }
-
-    public List<FieldWrapper> getFields() {
-        return fields;
-    }
-
-    public List<ConstructorWrapper> getConstructors() {
-        return constructors;
-    }
-
     public List<ConstructorTreeWrapper> getConstructorTree() {
         return constructorTree;
-    }
-
-    public List<MethodWrapper> getMethods() {
-        return methods;
     }
 
     private boolean isValidMethod(ExecutableElement it) {
@@ -175,7 +115,6 @@ public class TypeElementWrapper {
 
         if("valueOf".equals(it.getSimpleName().toString())
                 && it.getParameters().size()==1
-                // && it.getParameters().get(0).getSimpleName().toString().equals("java.lang.String")
                 && it.getModifiers().contains(Modifier.STATIC))
             return false;
 
@@ -190,12 +129,16 @@ public class TypeElementWrapper {
         return genericParameterNames;
     }
 
-//    public Map<String, String> getGenericParameters() {
-//        return genericParameters;
-//    }
-
     public List<InterfaceWrapper> getInterfaces() {
         return typeElement.getInterfaces().stream().map(InterfaceWrapper::new).collect(Collectors.toList());
+    }
+
+    public List<InterfaceTreeWrapper> getInterfaceTree() {
+        return classTree.getImplementsClause().stream().map(InterfaceTreeWrapper::new).collect(Collectors.toList());
+    }
+
+    public List<?> getImports() {
+        return compilationUnitTree.getImports();
     }
 
     public List<MethodTreeWrapper> getMethodTree() {

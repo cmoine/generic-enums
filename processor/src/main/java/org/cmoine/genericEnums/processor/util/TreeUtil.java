@@ -5,6 +5,7 @@ import org.cmoine.genericEnums.GenericEnumConstants;
 import org.cmoine.genericEnums.GenericEnumParam;
 import org.cmoine.genericEnums.processor.model.EnumConstantTreeWrapper;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -34,7 +35,11 @@ public class TreeUtil {
     }
 
     public static String getGenericParamName(ModifiersTree modifiersTree) {
-        Optional<? extends AnnotationTree> first = modifiersTree.getAnnotations().stream().filter(it -> GenericEnumParam.class.getSimpleName().equals(it.getAnnotationType().toString())).findFirst();
+        return getGenericParamName(modifiersTree.getAnnotations());
+    }
+
+    public static String getGenericParamName(List<? extends AnnotationTree> annotations) {
+        Optional<? extends AnnotationTree> first = annotations.stream().filter(it -> GenericEnumParam.class.getSimpleName().equals(it.getAnnotationType().toString())).findFirst();
         if(first.isPresent()) {
             for(ExpressionTree arg: first.get().getArguments()) {
                 if(arg instanceof LiteralTree) {

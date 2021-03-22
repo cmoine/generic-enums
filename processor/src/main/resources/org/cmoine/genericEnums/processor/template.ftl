@@ -1,5 +1,6 @@
 package ${packageName};
 
+<#list typeElement.imports as import>${import}</#list>
 <#if generatedTypeAvailable>
 import ${generatedType};
 
@@ -11,7 +12,7 @@ import ${generatedType};
     date = "${.now?string("yyyy-MM-dd'T'HH:mm:ssZ")}",
     comments = "version: ${version!"[N/A]"}, compiler: javac, environment: Java ${runtimeVersion} (${runtimeVendor})"
 )<#if !generatedTypeAvailable>*/</#if>
-public <#if typeElement.abstract>abstract </#if>class ${className}<${typeElement.genericParameterNames?join(', ')}> <#if typeElement.interfaces?has_content>implements ${typeElement.interfaces?join(', ')}</#if>{
+public <#if typeElement.abstract>abstract </#if>class ${className}<${typeElement.genericParameterNames?join(', ')}> <#if typeElement.interfaceTree?has_content>implements ${typeElement.interfaceTree?join(', ')}</#if>{
 <#list typeElement.enumConstantTree as enumConstant>
 <#assign enums = enumConstant.arguments />
 <#assign enums += ['"'+enumConstant.name+'"'] />
@@ -65,11 +66,11 @@ public <#if typeElement.abstract>abstract </#if>class ${className}<${typeElement
 </#list>
 
     public static ${className}[] values() {
-        return new ${className}[]{${typeElement.enumConstants?map(it -> it.name)?join(', ')}};
+        return new ${className}[]{${typeElement.enumConstantTree?map(it -> it.name)?join(', ')}};
     }
 
     public static ${className} valueOf(String name) {
-<#list typeElement.enumConstants as enumConstant>
+<#list typeElement.enumConstantTree as enumConstant>
         if("${enumConstant.name}".equals(name)) {
             return ${enumConstant.name};
         }

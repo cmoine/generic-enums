@@ -52,13 +52,10 @@ public class ConstructorTreeWrapper extends AbstractMethodTreeWrapper {
     public List<String> getGenericParameters() {
         List<String> result=new ArrayList<>();
         char genericParamName= GenericEnumConstants.GENERIC_NAME.charAt(0);
-//        List<? extends TypeParameterTree> typeParameters = methodTree.getTypeParameters();
         List<? extends VariableTree> parameters = methodTree.getParameters();
         for (int i = 0; i < parameters.size(); i++) {
             VariableTree parameter = parameters.get(i);
-//            TypeParameterTree parameterType = typeParameters.get(i);
             if(parameter.getType().toString().startsWith("Class")) {
-                System.out.println("type=" + parameter.getType());
                 String annotation = TreeUtil.getGenericParamName(parameter.getModifiers());
                 if (annotation != null) {
                     result.add(annotation);

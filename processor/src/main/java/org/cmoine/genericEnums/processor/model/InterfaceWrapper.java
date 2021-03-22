@@ -26,6 +26,7 @@ public class InterfaceWrapper {
     private static String toString(TypeMirror typeMirror) {
         DeclaredType declaredType= (DeclaredType) typeMirror;
         StringBuilder buf = new StringBuilder();
+        System.out.println("> " + declaredType.getAnnotationMirrors().stream().map(it -> it.toString()).collect(Collectors.joining(", ")));
         Optional<? extends AnnotationMirror> annotation = declaredType.getAnnotationMirrors().stream()
                 .filter(it -> it.toString().startsWith("@" + GenericEnumParam.class.getName())).findFirst();
         if(annotation.isPresent()) {
