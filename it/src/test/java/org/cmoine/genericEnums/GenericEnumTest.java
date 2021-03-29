@@ -59,4 +59,12 @@ public class GenericEnumTest {
         Assert.assertEquals(1, AbstractEnumExt.ONE.getValue().intValue());
         Assert.assertEquals(2.0, AbstractEnumExt.TWO.getValue().doubleValue(), 0.01);
     }
+
+    @Test
+    public void testPredicate() {
+        Assert.assertEquals(true, IsDefaultExt.INT.test(0));
+        Assert.assertEquals(false, IsDefaultExt.INT.test(1));
+        Assert.assertEquals(true, IsDefaultExt.STRING.test(""));
+        Assert.assertEquals(false, IsDefaultExt.STRING.test(null));
+    }
 }

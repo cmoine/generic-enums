@@ -20,28 +20,28 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.cmoine</groupId>
+    <groupId>io.github.cmoine</groupId>
     <artifactId>generic-enums-parent</artifactId>
-    <version>HEAD-SNAPSHOT</version>
+    <version>0.3</version>
     <!-- <relativePath>../pom.xml</relativePath> -->
   </parent>
   <url>https://github.com/cmoine/generic-enums/tree/master/value</url>
 
   <groupId>com.google.auto.value.it.functional</groupId>
   <artifactId>functional</artifactId>
-  <version>HEAD-SNAPSHOT</version>
+  <version>0.3</version>
   <name>Generic-Enums Functional Integration Test</name>
   <properties>
     <exclude.tests>this-matches-nothing</exclude.tests>
   </properties>
   <dependencies>
     <dependency>
-      <groupId>org.cmoine</groupId>
+      <groupId>io.github.cmoine</groupId>
       <artifactId>generic-enums-annotations</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.cmoine</groupId>
+      <groupId>io.github.cmoine</groupId>
       <artifactId>generic-enums-processor</artifactId>
       <version>${project.version}</version>
     </dependency>

@@ -18,15 +18,15 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
+  <!-- <parent>
     <groupId>org.sonatype.oss</groupId>
     <artifactId>oss-parent</artifactId>
     <version>7</version>
-  </parent>
+  </parent> -->
 
-  <groupId>org.cmoine</groupId>
+  <groupId>io.github.cmoine</groupId>
   <artifactId>generic-enums-parent</artifactId>
-  <version>HEAD-SNAPSHOT</version>
+  <version>0.3</version>
   <name>GenericEnums Parent</name>
   <description>
     Generic Enum value-type code generation for Java 7+.
@@ -52,6 +52,13 @@
     <system>GitHub Issues</system>
     <url>https://github.com/cmoine/generic-enums/issues</url>
   </issueManagement>
+
+  <developers>
+    <developer>
+      <id>cmoine</id>
+      <name>Christophe Moine</name>
+    </developer>
+  </developers>
 
   <licenses>
     <license>
@@ -177,5 +184,32 @@
         </plugin>
       </plugins>
     </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>1.5</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
 </project>

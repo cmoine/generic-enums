@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,8 +37,34 @@ public class GenericEnumProcessor extends AbstractProcessor {
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
-        super.init(processingEnv);
-        trees = Trees.instance(processingEnv);
+        ProcessingEnvironment processingEnvUnwrapped=jbUnwrap(processingEnv);
+        processingEnvUnwrapped=gradleUnwrap(processingEnvUnwrapped);
+        if (!processingEnvUnwrapped.getClass().getName().equals("com.sun.tools.javac.processing.JavacProcessingEnvironment")) {
+            throw new IllegalArgumentException(processingEnv.getClass().getName()
+                    +"<>com.sun.tools.javac.processing.JavacProcessingEnvironment");
+        }
+        super.init(processingEnvUnwrapped);
+        trees = Trees.instance(processingEnvUnwrapped);
+    }
+
+    private static ProcessingEnvironment gradleUnwrap(ProcessingEnvironment processingEnv) {
+        try {
+            Field field = processingEnv.getClass().getDeclaredField("delegate");
+            field.setAccessible(true);
+            processingEnv=(ProcessingEnvironment) field.get(processingEnv);
+        } catch (Exception ignored) {
+        }
+        return processingEnv;
+    }
+
+    private static ProcessingEnvironment jbUnwrap(ProcessingEnvironment wrapper) {
+        try {
+            final Class<?> apiWrappers = wrapper.getClass().getClassLoader().loadClass("org.jetbrains.jps.javac.APIWrappers");
+            final Method unwrapMethod = apiWrappers.getDeclaredMethod("unwrap", Class.class, Object.class);
+            return (ProcessingEnvironment) unwrapMethod.invoke(null, ProcessingEnvironment.class, wrapper);
+        }
+        catch (Throwable ignored) {}
+        return wrapper;
     }
 
     @Override
