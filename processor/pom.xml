@@ -21,12 +21,12 @@
   <parent>
     <groupId>io.github.cmoine</groupId>
     <artifactId>generic-enums-parent</artifactId>
-    <version>0.3</version>
+    <version>0.4</version>
   </parent>
 
   <groupId>io.github.cmoine</groupId>
   <artifactId>generic-enums-processor</artifactId>
-  <version>0.3</version>
+  <version>0.4</version>
   <name>GenericEnums Processor</name>
   <description>
     Generic Enum code generation for Java 1.7+

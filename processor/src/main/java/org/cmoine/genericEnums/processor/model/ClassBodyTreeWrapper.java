@@ -8,12 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ClassBodyTreeWrapper {
-    private final ClassTree classBody;
     private final List<MethodTreeWrapper> methods=new ArrayList<>();
     private final List<FieldTreeWrapper> fields=new ArrayList<>();
 
     public ClassBodyTreeWrapper(EnumConstantTreeWrapper parent, ClassTree classBody) {
-        this.classBody = classBody;
         classBody.getMembers().forEach(m -> {
             if(m instanceof MethodTree) {
                 methods.add(new MethodTreeWrapper(parent.parent, (MethodTree) m, parent));
@@ -29,9 +27,5 @@ public class ClassBodyTreeWrapper {
 
     public List<FieldTreeWrapper> getFields() {
         return fields;
-    }
-
-    public List<?> getMembers() {
-        return new ArrayList<>();
     }
 }

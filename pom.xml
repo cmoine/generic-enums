@@ -26,7 +26,7 @@
 
   <groupId>io.github.cmoine</groupId>
   <artifactId>generic-enums-parent</artifactId>
-  <version>0.3</version>
+  <version>0.4</version>
   <name>GenericEnums Parent</name>
   <description>
     Generic Enum value-type code generation for Java 7+.

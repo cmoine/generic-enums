@@ -18,9 +18,6 @@ public <#if typeElement.abstract>abstract </#if>class ${className}<${typeElement
 <#assign enums += ['"'+enumConstant.name+'"'] />
 <#assign enums += [enumConstant?index] />
     public static final ${className}<${enumConstant.types?join(', ')}> ${enumConstant.name}=new ${className}<${enumConstant.types?join(', ')}>(${enums?join(', ')})<#if enumConstant.classBody??> {
-<#list enumConstant.classBody.members as member>
-<#list member?split('\n') as line>            ${line}</#list>${instanceOf(member, 'com.sun.source.tree.VariableTree')?then(';', '')}
-</#list>
 <#list enumConstant.classBody.fields as field>
 <#assign pad="            "/>
 <#include "fieldTree.ftl"/>

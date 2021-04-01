@@ -22,14 +22,14 @@
   <parent>
     <groupId>io.github.cmoine</groupId>
     <artifactId>generic-enums-parent</artifactId>
-    <version>0.3</version>
+    <version>0.4</version>
     <!-- <relativePath>../pom.xml</relativePath> -->
   </parent>
   <url>https://github.com/cmoine/generic-enums/tree/master/value</url>
 
   <groupId>com.google.auto.value.it.functional</groupId>
   <artifactId>functional</artifactId>
-  <version>0.3</version>
+  <version>0.4</version>
   <name>Generic-Enums Functional Integration Test</name>
   <properties>
     <exclude.tests>this-matches-nothing</exclude.tests>

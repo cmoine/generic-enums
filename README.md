@@ -50,7 +50,7 @@ Generic Enums requires Java 1.8 or later.
 ```xml
 ...
 <properties>
-    <generic.enums.version>0.3</generic.enums.version>
+    <generic.enums.version>0.4</generic.enums.version>
 </properties>
 ...
 <dependencies>
@@ -88,8 +88,8 @@ Generic Enums requires Java 1.8 or later.
 
 ```groovy
 dependencies {
-    compileOnly "io.github.cmoine:generic-enums-annotations:0.3"
-    annotationProcessor "io.github.cmoine:generic-enums-processor:0.3"
+    compileOnly "io.github.cmoine:generic-enums-annotations:0.4"
+    annotationProcessor "io.github.cmoine:generic-enums-processor:0.4"
 }
 ```
 
