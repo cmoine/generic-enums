@@ -3,7 +3,6 @@ package org.cmoine.genericEnums.processor.model;
 import com.google.common.primitives.Primitives;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.MemberSelectTree;
-import com.sun.tools.javac.tree.JCTree;
 
 public class ArgumentWrapper {
     final ExpressionTree expr;
@@ -14,7 +13,7 @@ public class ArgumentWrapper {
         this.expr = expr;
         isClass=expr instanceof MemberSelectTree && "class".equals(((MemberSelectTree) expr).getIdentifier().toString());
         if(isClass) {
-            String type = ((JCTree.JCFieldAccess) expr).selected.toString();
+            String type = ((MemberSelectTree) expr).getExpression().toString();
             for(Class<?> clazz: Primitives.allPrimitiveTypes()) {
                 if(clazz.toString().equals(type)) {
                     type =Primitives.wrap(clazz).getSimpleName();

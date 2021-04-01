@@ -3,8 +3,8 @@ package org.cmoine.genericEnums.processor.model;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.NewClassTree;
-import com.sun.tools.javac.code.Symbol;
-import com.sun.tools.javac.tree.JCTree;
+import com.sun.source.tree.VariableTree;
+import org.cmoine.genericEnums.processor.util.TreeUtil;
 
 import javax.lang.model.element.VariableElement;
 import java.util.ArrayList;
@@ -18,15 +18,13 @@ public class EnumConstantTreeWrapper {
     final TypeElementWrapper parent;
     private final NewClassTree newClassTree;
     private final ArrayList<ArgumentWrapper> arguments;
-    private final Symbol constructor;
     private Map<String, String> typeBinding;
 
-    public EnumConstantTreeWrapper(TypeElementWrapper parent, JCTree.JCVariableDecl variableDecl) {
+    public EnumConstantTreeWrapper(TypeElementWrapper parent, VariableTree variableDecl) {
         this.parent = parent;
-        this.symbol = variableDecl.sym;
+        this.symbol = (VariableElement) TreeUtil.getSymbol(variableDecl);
 
         newClassTree = (NewClassTree) variableDecl.getInitializer();
-        constructor = ((JCTree.JCNewClass) newClassTree).constructor;
         arguments = new ArrayList<>(newClassTree.getArguments().size());
         List<? extends ExpressionTree> fieldInitializerArguments = newClassTree.getArguments();
         for (int i = 0; i < fieldInitializerArguments.size(); i++) {

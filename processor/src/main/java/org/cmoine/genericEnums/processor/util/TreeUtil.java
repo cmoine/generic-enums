@@ -5,6 +5,8 @@ import org.cmoine.genericEnums.GenericEnumConstants;
 import org.cmoine.genericEnums.GenericEnumParam;
 import org.cmoine.genericEnums.processor.model.EnumConstantTreeWrapper;
 
+import javax.lang.model.element.Element;
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -51,9 +53,18 @@ public class TreeUtil {
                     }
                 }
             }
-            return GenericEnumConstants.GENERIC_NAME; // +"/*" + first.get().getArguments().stream().map(it -> it.getClass().getSimpleName()).collect(Collectors.joining(", ")) + "*/" */;
+            return GenericEnumConstants.GENERIC_NAME;
         } else {
             return null;
+        }
+    }
+
+    public static Element getSymbol(Tree tree) {
+        try {
+            Field sym = tree.getClass().getDeclaredField("sym");
+            return (Element) sym.get(tree);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new IllegalArgumentException(e);
         }
     }
 }

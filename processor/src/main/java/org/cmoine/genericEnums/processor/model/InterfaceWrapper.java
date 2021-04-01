@@ -1,10 +1,10 @@
 package org.cmoine.genericEnums.processor.model;
 
-import com.sun.tools.javac.code.Symbol;
 import org.cmoine.genericEnums.GenericEnumConstants;
 import org.cmoine.genericEnums.GenericEnumParam;
 
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.QualifiedNameable;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.Objects;
@@ -35,9 +35,9 @@ public class InterfaceWrapper {
                     .map(it -> Objects.toString(it.getValue().getValue()))
                     .findFirst();
             String value=first.isPresent() ? first.get() : GenericEnumConstants.GENERIC_NAME;
-            buf.append(value+ "/*" + annotation.get().getElementValues().entrySet().stream().map(it -> it.getKey()+"="+it.getValue()).collect(Collectors.joining(", ")) + "*/");
+            buf.append(value);
         } else {
-            buf.append(((Symbol) declaredType.asElement()).getQualifiedName());
+            buf.append(((QualifiedNameable) declaredType.asElement()).getQualifiedName());
         }
 
         if (!declaredType.getTypeArguments().isEmpty()) {

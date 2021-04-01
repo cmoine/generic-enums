@@ -5,13 +5,9 @@ import com.sun.source.tree.*;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.TreePathScanner;
 import com.sun.source.util.Trees;
-import com.sun.tools.javac.code.Symbol;
-import com.sun.tools.javac.tree.JCTree;
+import org.cmoine.genericEnums.processor.util.TreeUtil;
 
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.*;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -59,8 +55,8 @@ public class TypeElementWrapper {
         Set<String> genericParameterNames=null;
         for(Tree tree: classTree.getMembers()) {
             if(tree instanceof MethodTree) {
-                JCTree.JCMethodDecl methodDecl= (JCTree.JCMethodDecl) tree;
-                Symbol.MethodSymbol methodSymbol = methodDecl.sym;
+                MethodTree methodDecl= (MethodTree) tree;
+                ExecutableElement methodSymbol = (ExecutableElement) TreeUtil.getSymbol(methodDecl);
                 if(ElementKind.METHOD.equals(methodSymbol.getKind())) {
                     if(isValidMethod(methodSymbol)) {
                         MethodTreeWrapper methodWrapper = new MethodTreeWrapper(this, methodDecl, null);
@@ -80,8 +76,8 @@ public class TypeElementWrapper {
                     constructorTreeBuilder.add(constructorWrapper);
                 }
             } else if (tree instanceof VariableTree) {
-                JCTree.JCVariableDecl variableDecl= (JCTree.JCVariableDecl) tree;
-                Symbol.VarSymbol sym = variableDecl.sym;
+                VariableTree variableDecl= (VariableTree) tree;
+                Element sym = TreeUtil.getSymbol(variableDecl);
                 if(ElementKind.ENUM_CONSTANT.equals(sym.getKind())) {
                     enumConstantTreeBuilder.add(new EnumConstantTreeWrapper(this, variableDecl));
                 } else if(ElementKind.FIELD.equals(sym.getKind())) {

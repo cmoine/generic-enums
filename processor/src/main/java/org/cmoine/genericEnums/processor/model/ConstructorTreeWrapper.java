@@ -1,9 +1,6 @@
 package org.cmoine.genericEnums.processor.model;
 
-import com.sun.source.tree.MethodTree;
-import com.sun.source.tree.StatementTree;
-import com.sun.source.tree.VariableTree;
-import com.sun.tools.javac.tree.JCTree;
+import com.sun.source.tree.*;
 import org.cmoine.genericEnums.GenericEnumConstants;
 import org.cmoine.genericEnums.processor.util.TreeUtil;
 
@@ -13,33 +10,33 @@ import java.util.stream.Collectors;
 
 public class ConstructorTreeWrapper extends AbstractMethodTreeWrapper {
 
-    private final JCTree.JCMethodInvocation thisInitializer;
+    private final MethodInvocationTree thisInitializer;
 
     public ConstructorTreeWrapper(TypeElementWrapper parent, MethodTree methodDecl) {
         super(parent, methodDecl);
         thisInitializer=thisInitializer();
     }
 
-    private JCTree.JCMethodInvocation thisInitializer() {
+    private MethodInvocationTree thisInitializer() {
         if(methodTree.getBody().getStatements().isEmpty())
             return null;
 
         StatementTree firstStatement = methodTree.getBody().getStatements().get(0);
-        if(!(firstStatement instanceof JCTree.JCExpressionStatement))
+        if(!(firstStatement instanceof ExpressionStatementTree))
             return null;
 
-        JCTree.JCExpression expr = ((JCTree.JCExpressionStatement) methodTree.getBody().getStatements().get(0)).expr;
-        if(!(expr instanceof JCTree.JCMethodInvocation))
+        ExpressionTree expr = ((ExpressionStatementTree) methodTree.getBody().getStatements().get(0)).getExpression();
+        if(!(expr instanceof MethodInvocationTree))
             return null;
 
-        JCTree.JCMethodInvocation jcMethodInvocation = (JCTree.JCMethodInvocation) expr;
+        MethodInvocationTree jcMethodInvocation = (MethodInvocationTree) expr;
         if(!jcMethodInvocation.toString().startsWith("this"))
             return null;
 
         return jcMethodInvocation;
     }
 
-    public JCTree.JCMethodInvocation getThisInitializer() {
+    public MethodInvocationTree getThisInitializer() {
         return thisInitializer;
     }
 
@@ -59,7 +56,7 @@ public class ConstructorTreeWrapper extends AbstractMethodTreeWrapper {
                 String annotation = TreeUtil.getGenericParamName(parameter.getModifiers());
                 if (annotation != null) {
                     result.add(annotation);
-                } else if (((JCTree.JCVariableDecl) parameter).sym.asType().toString().startsWith(Class.class.getName())) {
+                } else if (TreeUtil.getSymbol(parameter).asType().toString().startsWith(Class.class.getName())) {
                     result.add(Character.toString(genericParamName));
                     genericParamName++;
                 }
