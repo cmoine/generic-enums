@@ -6,10 +6,10 @@
 
 This is a Java annotation processor to provide Generic Enums. It is basically an attempt to implement the [JEP301](https://openjdk.java.net/jeps/301)
 
-Example of generic enum:
+Example of generic enum which can be useful if you want to serialize typed parameters:
 ```java
 @GenericEnum
-enum Primitive {
+enum Parameters {
     BYTE(byte.class, (byte)0),
     SHORT(short.class, (short)0),
     INT(int.class, 0),
@@ -25,7 +25,7 @@ enum Primitive {
     @GenericEnumParam
     private final Object defaultValue;
 
-    Primitive(Class<?> boxClass, @GenericEnumParam Object defaultValue) {
+    Parameters(Class<?> boxClass, @GenericEnumParam Object defaultValue) {
        this.boxClass = boxClass;
        this.defaultValue = defaultValue;
     }
@@ -36,6 +36,30 @@ enum Primitive {
     }
 }
 ```
+
+Then you can use it this way:
+```java
+class MyParameterSer {
+    int getInt(Parameters<Integer> param) {
+        // Use you deserialization mechanism...
+    }
+    
+    void setInt(Parameters<Integer> param, int value) {
+        // Use you Serialization mechanism...
+    }
+    
+    // And so on for all supported types
+}
+
+public class Main {
+    public static void main(String[] args) {
+        MyParameterSer parameterSer=new MyParameterSer();
+        parameterSer.setInt(ParametersExt.INT, 99);
+        parameterSer.setInt(ParametersExt.BOOLEAN, 99); // ends up in a compilation error !
+    }
+}
+```
+
 
 You can find other sample [here](https://github.com/cmoine/generic-enums/tree/main/it/src/main/java/org/cmoine/genericEnums). 
 
