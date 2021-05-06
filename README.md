@@ -37,6 +37,8 @@ enum Parameters {
 }
 ```
 
+The annotation processor will generate a class `ParametersExt` by default. 
+
 Then you can use it this way:
 ```java
 class MyParameterSer {
@@ -59,7 +61,6 @@ public class Main {
     }
 }
 ```
-
 
 You can find other sample [here](https://github.com/cmoine/generic-enums/tree/main/it/src/main/java/org/cmoine/genericEnums). 
 
