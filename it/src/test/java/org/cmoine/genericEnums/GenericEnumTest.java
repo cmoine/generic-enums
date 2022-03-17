@@ -1,5 +1,6 @@
 package org.cmoine.genericEnums;
 
+import java.io.Serializable;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -25,7 +26,7 @@ public class GenericEnumTest {
     @Test
     public void testIllegalArgumentException() {
         IllegalArgumentException e = Assert.assertThrows(IllegalArgumentException.class, () -> SimpleGenericEnumExt.valueOf(NON_EXISTENT_ENUM_NAME));
-        Assert.assertEquals("No enum constant org.cmoine.genericEnums.SimpleGenericEnumExt.NON_EXISTENT", e.getMessage());
+        Assert.assertEquals("No enum constant NON_EXISTENT", e.getMessage());
     }
 
     @Test
@@ -66,5 +67,21 @@ public class GenericEnumTest {
         Assert.assertEquals(false, IsDefaultExt.INT.test(1));
         Assert.assertEquals(true, IsDefaultExt.STRING.test(""));
         Assert.assertEquals(false, IsDefaultExt.STRING.test(null));
+    }
+
+    @Test
+    public void testOuterClass() {
+        Assert.assertEquals(ENUM_NAME, OuterClassExt.InnerEnumExt.ONE.name());
+    }
+
+    @Test
+    public void testOuterClassExplicitlyNamed() {
+        Assert.assertEquals(ENUM_NAME, MyOuterClass.InnerEnum.ONE.name());
+    }
+
+    @Test
+    public void testImplementsNonGenericInterface() {
+        Assert.assertTrue(Serializable.class.isAssignableFrom(SerializableOuterClassExt.class));
+        Assert.assertTrue(Serializable.class.isAssignableFrom(SerializableOuterClassExt.InnerEnumExt.class));
     }
 }
