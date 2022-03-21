@@ -2,14 +2,20 @@ package org.cmoine.genericEnums;
 
 @GenericEnum
 public enum PolymorphicConstructorEnum {
+    ZERO_PARAM,
     ONE_PARAM(int.class),
-    TWO_PARAM(int.class, 1);
+    TWO_PARAM(int.class, 2);
 
     private final Class<?> clazz;
     private final int _default;
 
+    @GenericEnumConstructorParam(type = int.class)
+    PolymorphicConstructorEnum() {
+        this(int.class, 0);
+    }
+
     PolymorphicConstructorEnum(Class<?> clazz) {
-        this(clazz, 0);
+        this(clazz, 1);
     }
 
     PolymorphicConstructorEnum(Class<?> clazz, int _default) {

@@ -1,5 +1,7 @@
 package org.cmoine.genericEnums.processor.model;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Streams;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.NewClassTree;
@@ -42,10 +44,7 @@ public class EnumConstantTreeWrapper {
     }
 
     public List<String> getTypes() {
-        return arguments.stream()
-                .filter(it -> it.isClass)
-                .map(it -> it.type)
-                .collect(Collectors.toList());
+        return new ArrayList<>(getTypeBinding().values());
     }
 
     public ClassBodyTreeWrapper getClassBody() {
@@ -69,10 +68,17 @@ public class EnumConstantTreeWrapper {
                 throw new IllegalArgumentException("Cannot find suitable constructor enum: " + parent.classTree.getSimpleName() + "." + getName());
             List<ArgumentWrapper> argumentOfInterest = arguments.stream().filter(it -> it.isClass).collect(Collectors.toList());
             List<String> genericParameters = constructor.getGenericParameters();
-            for (int i = 0; i < genericParameters.size(); i++) {
-                ArgumentWrapper argumentWrapper = argumentOfInterest.get(i);
-                String genericParameterName = genericParameters.get(i);
-                result.put(genericParameterName, argumentWrapper.type);
+            if (argumentOfInterest.size() != genericParameters.size()) {
+                // The constructor doesn't have the correct number of Class parameters, see if it has GenericEnumConstructorParam annotations.
+                result = Streams.zip(genericParameters.stream(), constructor.getGenericParametersTypes().stream(), Maps::immutableEntry)
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+            } else {
+                for (int i = 0; i < genericParameters.size(); i++) {
+                  ArgumentWrapper argumentWrapper = argumentOfInterest.get(i);
+                  String genericParameterName = genericParameters.get(i);
+                  result.put(genericParameterName, argumentWrapper.type);
+                }
             }
             typeBinding=result;
         }

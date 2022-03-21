@@ -1,7 +1,13 @@
 package org.cmoine.genericEnums.processor.util;
 
+import com.google.common.primitives.Primitives;
 import com.sun.source.tree.*;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Collections;
 import org.cmoine.genericEnums.GenericEnumConstants;
+import org.cmoine.genericEnums.GenericEnumConstructorParam;
+import org.cmoine.genericEnums.GenericEnumConstructorParams;
 import org.cmoine.genericEnums.GenericEnumParam;
 import org.cmoine.genericEnums.processor.model.EnumConstantTreeWrapper;
 
@@ -66,5 +72,108 @@ public class TreeUtil {
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalArgumentException(e);
         }
+    }
+
+  /**
+   * Get the list of 'key' values from the specified list of annotations. Loop through the specified
+   * annotation extracting the values associated with 'key' from any
+   * &#64;GenericEnumConstructorParam annotations.
+   *
+   * @param annotations the annotations to search
+   * @param key the name of the field to collate
+   * @return The list of values, or an empty list if none are found.
+   */
+  public static List<String> getGenericConstructorParams(
+      List<? extends AnnotationTree> annotations, String key) {
+        List<? extends AnnotationTree> annotationTrees = annotations.stream().filter(it -> GenericEnumConstructorParam.class.getSimpleName().equals(it.getAnnotationType().toString())).collect(
+            Collectors.toList());
+
+        if (annotationTrees.isEmpty()) {
+            final Optional<? extends AnnotationTree> first = annotations.stream().filter(
+                it -> GenericEnumConstructorParams.class.getSimpleName()
+                    .equals(it.getAnnotationType().toString())).findFirst();
+
+            if (first.isPresent()) {
+                AssignmentTree assignmentTree = (AssignmentTree) first.get().getArguments().get(0);
+
+                if (assignmentTree.getExpression() instanceof AnnotationTree) {
+                    annotationTrees = Collections.singletonList((AnnotationTree) assignmentTree.getExpression());
+
+                } else if (assignmentTree.getExpression() instanceof NewArrayTree) {
+                    NewArrayTree newArrayTree = (NewArrayTree)assignmentTree.getExpression();
+                    annotationTrees = newArrayTree.getInitializers()
+                        .stream()
+                        .map(AnnotationTree.class::cast)
+                        .collect(Collectors.toList());
+                }
+            }
+        }
+
+        final List<String> arguments = new ArrayList<>();
+        char name = 'T';
+        for (AnnotationTree annotationTree : annotationTrees) {
+            boolean argumentAdded = false;
+
+            for(ExpressionTree arg: annotationTree.getArguments()) {
+                if (arg instanceof LiteralTree) {
+                    LiteralTree literalTree = (LiteralTree) arg;
+                    arguments.add(literalTree.getValue().toString());
+                    argumentAdded = true;
+
+                } else if (arg instanceof AssignmentTree) {
+                    AssignmentTree assignmentTree= (AssignmentTree) arg;
+
+                    if(key.equals(assignmentTree.getVariable().toString())) {
+                        if (assignmentTree.getExpression() instanceof LiteralTree) {
+                            LiteralTree literalTree = (LiteralTree)assignmentTree.getExpression();
+                            arguments.add(literalTree.getValue().toString());
+                            argumentAdded = true;
+
+                        } else if (assignmentTree.getExpression() instanceof MemberSelectTree) {
+                            MemberSelectTree memberSelectTree = (MemberSelectTree) assignmentTree.getExpression();
+                            String type = memberSelectTree.getExpression().toString();
+                            arguments.add(getBoxedClassName(type));
+                            argumentAdded = true;
+                        }
+                    }
+                }
+            }
+
+            if (!argumentAdded && "name".equals(key)) {
+                arguments.add(String.valueOf(name));
+                name++;
+            }
+        }
+
+        return arguments;
+    }
+
+    /**
+     * Does the specified list of annotations contains the specified annotationClass?
+     *
+     * @param annotations the list to check
+     * @param annotationClass the annotation class to find
+     * @return <code>true</code> if the list contains the specified annotation, <code>false</code> otherwise.
+     */
+    public static <T extends Annotation> boolean hasAnnotation(List<? extends AnnotationTree> annotations, Class<T> annotationClass) {
+        Optional<? extends AnnotationTree> first = annotations.stream().filter(it -> annotationClass.getSimpleName().equals(it.getAnnotationType().toString())).findFirst();
+
+        return first.isPresent();
+    }
+
+  /**
+   * Get the boxed class name for the specified type. If type does not represent a primitive type,
+   * then the original value is returned.
+   *
+   * @param type A simple name of a class
+   * @return The boxed class name of type, or type if it is not a primitive.
+   */
+   public static String getBoxedClassName(final String type) {
+        for(Class<?> clazz: Primitives.allPrimitiveTypes()) {
+            if(clazz.toString().equals(type)) {
+                return Primitives.wrap(clazz).getSimpleName();
+            }
+        }
+        return type;
     }
 }

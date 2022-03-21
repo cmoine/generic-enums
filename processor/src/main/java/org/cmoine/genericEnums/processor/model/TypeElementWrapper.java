@@ -57,6 +57,28 @@ public class TypeElementWrapper {
         ImmutableList.Builder<EnumConstantTreeWrapper> enumConstantTreeBuilder=ImmutableList.builder();
         ImmutableList.Builder<FieldTreeWrapper> fieldTreeBuilder=ImmutableList.builder();
         Set<String> genericParameterNames=null;
+        // Process constructors first, as the resulting list is used during processing of other methods.
+        for (Tree tree: classTree.getMembers()) {
+            if(tree instanceof MethodTree) {
+                MethodTree methodDecl= (MethodTree) tree;
+                ExecutableElement methodSymbol = (ExecutableElement) TreeUtil.getSymbol(methodDecl);
+                if(ElementKind.CONSTRUCTOR.equals(methodSymbol.getKind())) {
+                    ConstructorTreeWrapper constructorWrapper = new ConstructorTreeWrapper(this, methodDecl);
+                    if(genericParameterNames==null) {
+                        genericParameterNames=new TreeSet<>(constructorWrapper.getGenericParameters());
+                    } else {
+                        String oldGenericParameterNames = toString(genericParameterNames);
+                        String newGenericParameterNames = toString(new TreeSet<>(constructorWrapper.getGenericParameters()));
+                        if(!oldGenericParameterNames.equals(newGenericParameterNames)) {
+                            throw new IllegalArgumentException("All constructors must have the same generic parameters: '"+oldGenericParameterNames+"' != '"+newGenericParameterNames+"' (class="+typeElement.getQualifiedName()+")");
+                        }
+                    }
+                    constructorTreeBuilder.add(constructorWrapper);
+                }
+            }
+        }
+        constructorTree=constructorTreeBuilder.build();
+
         for(Tree tree: classTree.getMembers()) {
             if(tree instanceof MethodTree) {
                 MethodTree methodDecl= (MethodTree) tree;
@@ -66,18 +88,6 @@ public class TypeElementWrapper {
                         MethodTreeWrapper methodWrapper = new MethodTreeWrapper(this, methodDecl, null);
                         methodTreeBuilder.add(methodWrapper);
                     }
-                } else if(ElementKind.CONSTRUCTOR.equals(methodSymbol.getKind())) {
-                    ConstructorTreeWrapper constructorWrapper = new ConstructorTreeWrapper(this, methodDecl);
-                    if(genericParameterNames==null) {
-                        genericParameterNames=new TreeSet<>(constructorWrapper.getGenericParameters());
-                    } else {
-                        String oldGenericParameterNames = toString(genericParameterNames);
-                        String newGenericParameterNames = toString(new TreeSet<>(constructorWrapper.getGenericParameters()));
-                        if(!oldGenericParameterNames.equals(newGenericParameterNames)) {
-                            throw new IllegalArgumentException("All constructors must have the same generic parameters: "+oldGenericParameterNames+"<>"+newGenericParameterNames+"(class="+typeElement.getQualifiedName()+")");
-                        }
-                    }
-                    constructorTreeBuilder.add(constructorWrapper);
                 }
             } else if (tree instanceof VariableTree) {
                 VariableTree variableDecl= (VariableTree) tree;
@@ -89,7 +99,6 @@ public class TypeElementWrapper {
                 }
             }
         }
-        constructorTree=constructorTreeBuilder.build();
         enumConstantTree=enumConstantTreeBuilder.build();
         methodTree=methodTreeBuilder.build();
         fieldTree=fieldTreeBuilder.build();
