@@ -5,6 +5,10 @@ import com.sun.source.tree.*;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.TreePathScanner;
 import com.sun.source.util.Trees;
+import java.util.ArrayList;
+import java.util.function.Predicate;
+import org.cmoine.genericEnums.GenericEnum;
+import org.cmoine.genericEnums.GenericEnumOuterClass;
 import org.cmoine.genericEnums.processor.util.TreeUtil;
 
 import javax.lang.model.element.*;
@@ -89,9 +93,6 @@ public class TypeElementWrapper {
         enumConstantTree=enumConstantTreeBuilder.build();
         methodTree=methodTreeBuilder.build();
         fieldTree=fieldTreeBuilder.build();
-        if(genericParameterNames.isEmpty()) {
-            throw new IllegalArgumentException("The class "+typeElement.getQualifiedName()+" must have at least one constructor which define a Generic Parameter");
-        }
         this.genericParameterNames=genericParameterNames;
     }
 
@@ -121,20 +122,47 @@ public class TypeElementWrapper {
         return getMethodTree().stream().anyMatch(it -> it.isAbstract());
     }
 
+    /**
+     * Should the generated enum be declared 'static'? I.e. Will this pseudo enum class be an inner-class.
+     *
+     * @return <code>true</code> if the class should be declared 'static', <code>false</code> otherwise.
+     */
+    public boolean isStatic() {
+        return typeElement.getEnclosingElement().getKind() == ElementKind.CLASS;
+    }
+
+    /**
+     * Get the set of template names for this class or enum.
+     * e.g. <code>"T", "U"</code>
+     *
+     * @return the set of type names used in the declaration of this class.
+     */
     public Set<String> getGenericParameterNames() {
         return genericParameterNames;
     }
 
-    public List<InterfaceWrapper> getInterfaces() {
-        return typeElement.getInterfaces().stream().map(InterfaceWrapper::new).collect(Collectors.toList());
+    /**
+     * Get the list of interfaces this class implements. Includes Serializable and Comparable.
+     *
+     * @return a list of interface names which this class implements.
+     */
+    public List<String> getInterfaceTree() {
+        Set<String> interfaceTreeWrappers = new TreeSet<>();
+        if (!isClass()) {
+            interfaceTreeWrappers.add("Comparable<" + getClassName() + "<" + String.join(", ", getGenericParameterNames()) + ">>");
+        }
+        interfaceTreeWrappers.add("Serializable");
+        interfaceTreeWrappers.addAll(classTree.getImplementsClause().stream().map(InterfaceTreeWrapper::new).map(Object::toString).collect(Collectors.toList()));
+        return new ArrayList<>(interfaceTreeWrappers);
     }
 
-    public List<InterfaceTreeWrapper> getInterfaceTree() {
-        return classTree.getImplementsClause().stream().map(InterfaceTreeWrapper::new).collect(Collectors.toList());
-    }
-
-    public List<?> getImports() {
-        return compilationUnitTree.getImports();
+    /**
+     * Get the list of import statements this class requires.
+     *
+     * @return a list of imports list class requires.
+     */
+    public List<String> getImports() {
+        return compilationUnitTree.getImports().stream().map(Object::toString).collect(Collectors.toList());
     }
 
     public List<MethodTreeWrapper> getMethodTree() {
@@ -147,5 +175,53 @@ public class TypeElementWrapper {
 
     public List<EnumConstantTreeWrapper> getEnumConstantTree() {
         return enumConstantTree;
+    }
+
+    /**
+     * Does this type represent a class, as apposed to an enum?
+     *
+     * @return <code>true</code> if this type represents a class, <code>false</code> if it represents an enum.
+     */
+    public boolean isClass() {
+        return typeElement.getKind() == ElementKind.CLASS;
+    }
+
+    /**
+     * Calculate the name of the generated class.
+     * <ul>
+     * <li>If this typeElement is a class, then use the {@link GenericEnumOuterClass} annotation (if present) to calculate the name.</li>
+     * <li>If this typeElement is an enum, then use the required {@link GenericEnum} annotation to calculate the name.</li>
+     * </ul>
+     * @return The name to use for the generated class.
+     */
+    public String getClassName() {
+        switch (typeElement.getKind()) {
+            case CLASS:
+                final GenericEnumOuterClass genericEnumOuterClass = typeElement.getAnnotation(
+                    GenericEnumOuterClass.class);
+
+                if (genericEnumOuterClass != null) {
+                    return genericEnumOuterClass.name().replace("%", typeElement.getSimpleName());
+                }
+                return typeElement.getSimpleName() + "Ext";
+
+            case ENUM:
+                return typeElement.getAnnotation(GenericEnum.class).name().replace("%", typeElement.getSimpleName());
+
+            default:
+                throw new IllegalArgumentException("Unsupported element " + typeElement.getKind());
+        }
+    }
+
+    /**
+     * Does the original type have a <code>toString()</code> method.
+     *
+     * @return <code>true</code> if a toString() method is present, <code>false</code> otherwise.
+     */
+    public boolean isToStringMethodPresent() {
+        Predicate<MethodTreeWrapper> isToString = methodTreeWrapper ->
+            methodTreeWrapper.getParameters().isEmpty() && methodTreeWrapper.getName().contentEquals("toString");
+
+        return methodTree.stream().anyMatch(isToString);
     }
 }

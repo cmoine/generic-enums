@@ -1,30 +1,35 @@
 package org.cmoine.genericEnums.processor;
 
-import org.cmoine.genericEnums.processor.model.TypeElementWrapper;
-
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.jar.Manifest;
+import java.util.stream.Collectors;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.util.Elements;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.jar.Manifest;
+import org.cmoine.genericEnums.processor.model.TypeElementWrapper;
 
 public class TemplateData {
     private final TypeElementWrapper typeElement;
     private final String packageName;
     private final Class<? extends AbstractProcessor> processor;
-    private final String className;
+    private final Set<TypeElementWrapper> enumTypeElements;
     private final Manifest manifest;
     private final Elements elementUtils;
     private final boolean generatedTypeAvailable;
     private final String generatedType;
 
-    public TemplateData(Class<? extends AbstractProcessor> processor, ProcessingEnvironment processingEnv, String packageName,
-                        String className, TypeElementWrapper typeElement) throws IOException {
+    public TemplateData(Class<? extends AbstractProcessor> processor,
+        ProcessingEnvironment processingEnv, String packageName,
+        TypeElementWrapper typeElement, Set<TypeElementWrapper> enumTypeElements) throws IOException {
         this.processor=processor;
-        this.className = className;
+        this.enumTypeElements = enumTypeElements;
         manifest=getManifest();
         this.packageName=packageName;
         this.typeElement=typeElement;
@@ -116,7 +121,44 @@ public class TemplateData {
         return typeElement;
     }
 
-    public String getClassName() {
-        return className;
+    /**
+     * Get the list of import statements for all the generated types.
+     * <p>
+     * Includes Serializable and Generated (if available).
+     *
+     * @return the list of imports for all the generated types.
+     */
+    public List<String> getImports() {
+        Set<String> importSet = typeElement.getImports().stream().map(Object::toString).collect(Collectors.toSet());
+        for (TypeElementWrapper enumTypeElement : enumTypeElements) {
+            importSet.addAll(enumTypeElement.getImports());
+        }
+
+        if (generatedType != null) {
+            importSet.add("import " + generatedType + ";");
+        }
+        importSet.add("import java.io.Serializable;");
+
+        final ArrayList<String> importList = new ArrayList<>(importSet);
+        Collections.sort(importList);
+        return importList;
+    }
+
+    /**
+     * Returns whether or not an outer class is required.
+     *
+     * @return <code>true</code> if an outer class is required, <code>false</code> otherwise.
+     */
+    public boolean isOuterClass() {
+        return typeElement.isClass();
+    }
+
+    /**
+     * Returns the set of source enum types.
+     *
+     * @return a set containing the source enum types.
+     */
+    public Set<TypeElementWrapper> getEnumTypeElements() {
+        return enumTypeElements;
     }
 }
