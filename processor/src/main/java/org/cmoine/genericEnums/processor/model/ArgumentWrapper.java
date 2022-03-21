@@ -1,8 +1,8 @@
 package org.cmoine.genericEnums.processor.model;
 
-import com.google.common.primitives.Primitives;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.MemberSelectTree;
+import org.cmoine.genericEnums.processor.util.TreeUtil;
 
 public class ArgumentWrapper {
     final ExpressionTree expr;
@@ -14,12 +14,7 @@ public class ArgumentWrapper {
         isClass=expr instanceof MemberSelectTree && "class".equals(((MemberSelectTree) expr).getIdentifier().toString());
         if(isClass) {
             String type = ((MemberSelectTree) expr).getExpression().toString();
-            for(Class<?> clazz: Primitives.allPrimitiveTypes()) {
-                if(clazz.toString().equals(type)) {
-                    type =Primitives.wrap(clazz).getSimpleName();
-                    break;
-                }
-            }
+            type = TreeUtil.getBoxedClassName(type);
             this.type=type;
         } else {
             this.type=null;
