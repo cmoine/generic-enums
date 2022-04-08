@@ -98,7 +98,7 @@ Generic Enums requires Java 1.8 or later.
                 <annotationProcessorPaths>
                     <path>
                         <groupId>io.github.cmoine</groupId>
-                        <artifactId>generic-enums-annotations</artifactId>
+                        <artifactId>generic-enums-processor</artifactId>
                         <version>${generic.enums.version}</version>
                     </path>
                 </annotationProcessorPaths>
