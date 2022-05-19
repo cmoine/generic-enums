@@ -67,4 +67,11 @@ public class GenericEnumTest {
         Assert.assertEquals(true, IsDefaultExt.STRING.test(""));
         Assert.assertEquals(false, IsDefaultExt.STRING.test(null));
     }
+
+    @Test
+    public void testDefaultConstructor() {
+        Assert.assertEquals(0, DefaultConstructorEnumExt.ZERO_PARAM.get_default());
+        Assert.assertEquals(1, DefaultConstructorEnumExt.ONE_PARAM.get_default());
+        Assert.assertEquals(2, DefaultConstructorEnumExt.TWO_PARAM.get_default());
+    }
 }

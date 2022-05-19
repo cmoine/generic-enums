@@ -8,60 +8,88 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
+
 public class ConstructorTreeWrapper extends AbstractMethodTreeWrapper {
 
-    private final MethodInvocationTree thisInitializer;
+  private final MethodInvocationTree thisInitializer;
 
-    public ConstructorTreeWrapper(TypeElementWrapper parent, MethodTree methodDecl) {
-        super(parent, methodDecl);
-        thisInitializer=thisInitializer();
-    }
+  private List<String> genericParameters;
 
-    private MethodInvocationTree thisInitializer() {
-        if(methodTree.getBody().getStatements().isEmpty())
-            return null;
+  private List<ArgumentWrapper> thisArguments;
 
-        StatementTree firstStatement = methodTree.getBody().getStatements().get(0);
-        if(!(firstStatement instanceof ExpressionStatementTree))
-            return null;
+  public ConstructorTreeWrapper(TypeElementWrapper parent, MethodTree methodDecl) {
+    super(parent, methodDecl);
+    thisInitializer = thisInitializer();
+    // Initialize GenericParameters
+  }
 
-        ExpressionTree expr = ((ExpressionStatementTree) methodTree.getBody().getStatements().get(0)).getExpression();
-        if(!(expr instanceof MethodInvocationTree))
-            return null;
+  private MethodInvocationTree thisInitializer() {
+    if (methodTree.getBody().getStatements().isEmpty()) return null;
 
-        MethodInvocationTree jcMethodInvocation = (MethodInvocationTree) expr;
-        if(!jcMethodInvocation.toString().startsWith("this"))
-            return null;
+    StatementTree firstStatement = methodTree.getBody().getStatements().get(0);
+    if (!(firstStatement instanceof ExpressionStatementTree)) return null;
 
-        return jcMethodInvocation;
-    }
+    ExpressionTree expr =
+        ((ExpressionStatementTree) methodTree.getBody().getStatements().get(0)).getExpression();
+    if (!(expr instanceof MethodInvocationTree)) return null;
 
-    public MethodInvocationTree getThisInitializer() {
-        return thisInitializer;
-    }
+    MethodInvocationTree jcMethodInvocation = (MethodInvocationTree) expr;
+    if (!jcMethodInvocation.toString().startsWith("this")) return null;
 
-    public List<?> getParameters() {
-        return methodTree.getParameters().stream()
-                .map(it -> new ParameterTreeWrapper(parent, it, null))
-                .collect(Collectors.toList());
-    }
+    return jcMethodInvocation;
+  }
 
-    public List<String> getGenericParameters() {
-        List<String> result=new ArrayList<>();
-        char genericParamName= GenericEnumConstants.GENERIC_NAME.charAt(0);
-        List<? extends VariableTree> parameters = methodTree.getParameters();
-        for (int i = 0; i < parameters.size(); i++) {
-            VariableTree parameter = parameters.get(i);
-            if(parameter.getType().toString().startsWith("Class")) {
-                String annotation = TreeUtil.getGenericParamName(parameter.getModifiers());
-                if (annotation != null) {
-                    result.add(annotation);
-                } else if (TreeUtil.getSymbol(parameter).asType().toString().startsWith(Class.class.getName())) {
-                    result.add(Character.toString(genericParamName));
-                    genericParamName++;
-                }
-            }
+  public MethodInvocationTree getThisInitializer() {
+    return thisInitializer;
+  }
+
+  public List<?> getParameters() {
+    return methodTree.getParameters().stream()
+        .map(it -> new ParameterTreeWrapper(parent, it, null))
+        .collect(Collectors.toList());
+  }
+
+  public List<String> getGenericParameters() {
+    initializeGenericParameters();
+    return genericParameters;
+  }
+
+  public List<ArgumentWrapper> getThisArguments() {
+    initializeGenericParameters();
+    return thisArguments;
+  }
+
+  private void initializeGenericParameters() {
+    List<String> tmp = new ArrayList<>();
+    char genericParamName = GenericEnumConstants.GENERIC_NAME.charAt(0);
+    List<? extends VariableTree> parameters = methodTree.getParameters();
+    boolean genericParameterFound=false;
+    for (int i = 0; i < parameters.size(); i++) {
+      VariableTree parameter = parameters.get(i);
+      if (parameter.getType().toString().startsWith("Class")) {
+        String annotation = TreeUtil.getGenericParamName(parameter.getModifiers());
+        if (annotation != null) {
+          tmp.add(annotation);
+        } else if (TreeUtil.getSymbol(parameter)
+                .asType()
+                .toString()
+                .startsWith(Class.class.getName())) {
+          tmp.add(Character.toString(genericParamName));
+          genericParamName++;
+          genericParameterFound=true;
         }
-        return result;
+      }
     }
+    if((!genericParameterFound) && getThisInitializer()!=null) {
+      // Maybe we can infer from this(..)
+      thisArguments = ArgumentWrapper.wrap(getThisInitializer().getArguments());
+      ConstructorTreeWrapper matchingConstructor = parent.findMatchingConstructor(
+              thisArguments);
+      genericParameters = matchingConstructor.getGenericParameters();
+    } else {
+      genericParameters = tmp;
+      thisArguments=emptyList();
+    }
+  }
 }
