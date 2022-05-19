@@ -63,6 +63,11 @@
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.google.googlejavaformat</groupId>
+      <artifactId>google-java-format</artifactId>
+      <version>1.15.0</version>
+    </dependency>
     <!-- test dependencies -->
     <dependency>
       <groupId>com.google.errorprone</groupId>
@@ -129,7 +134,7 @@
         <artifactId>maven-invoker-plugin</artifactId>
       </plugin>
       <plugin>
-        <groupId>org.immutables.tools</groupId>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
         <executions>
           <execution>
@@ -144,27 +149,6 @@
                   <exclude>com.google.code.findbugs:jsr305</exclude>
                 </excludes>
               </artifactSet>
-              <relocations>
-                <relocation>
-                  <pattern>org.objectweb</pattern>
-                  <shadedPattern>GenericEnums.shaded.org.objectweb$</shadedPattern>
-                </relocation>
-                <relocation>
-                  <pattern>com.google</pattern>
-                  <shadedPattern>GenericEnums.shaded.com.google$</shadedPattern>
-                  <excludes>
-                    <exclude>com.google.auto.value.**</exclude>
-                  </excludes>
-                </relocation>
-                <relocation>
-                  <pattern>net.ltgt.gradle.incap</pattern>
-                  <shadedPattern>GenericEnums.shaded.net.ltgt.gradle.incap$</shadedPattern>
-                </relocation>
-                <relocation>
-                  <pattern>org.checkerframework</pattern>
-                  <shadedPattern>GenericEnums.shaded.org.checkerframework$</shadedPattern>
-                </relocation>
-              </relocations>
             </configuration>
           </execution>
         </executions>

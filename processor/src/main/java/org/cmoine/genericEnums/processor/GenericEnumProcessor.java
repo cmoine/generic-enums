@@ -2,6 +2,8 @@ package org.cmoine.genericEnums.processor;
 
 import com.google.auto.service.AutoService;
 import com.google.common.collect.Maps;
+import com.google.googlejavaformat.java.Formatter;
+import com.google.googlejavaformat.java.FormatterException;
 import com.sun.source.util.Trees;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -94,9 +96,12 @@ public class GenericEnumProcessor extends AbstractProcessor {
                         getClass().getPackage().getName().replace('.', '/'));
                 cfg.setSharedVariable("instanceOf", new InstanceOfMethod());
                 Template template = cfg.getTemplate("template.ftl");
+                StringWriter source=new StringWriter();
                 template.createProcessingEnvironment(new TemplateData(getClass(),
                         processingEnv, pkgName, className, new TypeElementWrapper(trees, typeElement)), writer).process();
-            } catch (TemplateException e) {
+                String formattedSource = new Formatter().formatSource(source.toString());
+                writer.write(formattedSource);
+            } catch (TemplateException | FormatterException e) {
                 print(e);
             }
         } catch (IOException e) {
