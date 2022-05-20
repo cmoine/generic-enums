@@ -157,9 +157,9 @@
           </executions>
         </plugin>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
+          <groupId>org.immutables.tools</groupId>
           <artifactId>maven-shade-plugin</artifactId>
-          <version>3.3.0</version>
+          <version>4</version>
         </plugin>
       </plugins>
     </pluginManagement>
