@@ -74,4 +74,9 @@ public class GenericEnumTest {
         Assert.assertEquals(1, DefaultConstructorEnumExt.ONE_PARAM.get_default());
         Assert.assertEquals(2, DefaultConstructorEnumExt.TWO_PARAM.get_default());
     }
+
+    @Test
+    public void testNonGenericInterface() {
+        Assert.assertTrue(NonGenericImplementsEnumExt.INT instanceof Runnable);
+    }
 }

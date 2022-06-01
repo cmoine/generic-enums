@@ -1,6 +1,7 @@
 package org.cmoine.genericEnums.processor.model;
 
 import com.sun.source.tree.AnnotatedTypeTree;
+import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.ParameterizedTypeTree;
 import com.sun.source.tree.Tree;
 import org.cmoine.genericEnums.processor.util.TreeUtil;
@@ -28,6 +29,8 @@ public class InterfaceTreeWrapper {
             String genericParamName = TreeUtil.getGenericParamName(att.getAnnotations());
             if(genericParamName!=null)
                 return genericParamName;
+        } else if (tree instanceof IdentifierTree) {
+            return ((IdentifierTree) tree).getName().toString();
         }
         return tree.getClass().toString();
 //        DeclaredType declaredType= (DeclaredType) typeMirror;
