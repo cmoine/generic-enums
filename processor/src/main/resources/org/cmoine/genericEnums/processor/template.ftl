@@ -75,16 +75,36 @@ public <#if typeElement.abstract>abstract </#if>class ${className}<${typeElement
         throw new IllegalArgumentException("No enum constant ${packageName}.${className}."+name);
     }
 
-    public String name() {
+    public final String name() {
         return this.__enum_name__;
     }
 
-    public int ordinal() {
+    public final int ordinal() {
         return this.__ordinal__;
     }
+
+    @Override
+    public final boolean equals(Object other) {
+        return this==other;
+    }
+
+    @Override
+    public final int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
+    public final int compareTo(${typeElement.className}<${typeElement.genericWildcardString}> other) {
+        if (getClass() != other.getClass()) {
+            throw new ClassCastException();
+        }
+        return this.__ordinal__ - other.__ordinal__;
+    }
+<#if !typeElement.toStringMethodPresent>
 
     @Override
     public String toString() {
         return name();
     }
+</#if>
 }

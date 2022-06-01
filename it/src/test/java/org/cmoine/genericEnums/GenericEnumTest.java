@@ -79,4 +79,17 @@ public class GenericEnumTest {
     public void testNonGenericInterface() {
         Assert.assertTrue(NonGenericImplementsEnumExt.INT instanceof Runnable);
     }
+
+    @Test
+    public void testComparable() {
+        Assert.assertEquals(0, ComparableEnumExt.INT.compareTo(ComparableEnumExt.INT));
+        Assert.assertTrue(ComparableEnumExt.INT.compareTo(ComparableEnumExt.INT2) < 0);
+        Assert.assertTrue(ComparableEnumExt.INT.compareTo(ComparableEnumExt.STRING) < 0);
+        Assert.assertTrue(ComparableEnumExt.STRING.compareTo(ComparableEnumExt.INT) > 0);
+    }
+
+    @Test
+    public void testProvidedToString() {
+        Assert.assertEquals("toString(): INT", ProvidedToStringEnumExt.INT.toString());
+    }
 }

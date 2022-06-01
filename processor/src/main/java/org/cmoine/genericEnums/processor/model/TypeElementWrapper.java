@@ -1,10 +1,14 @@
 package org.cmoine.genericEnums.processor.model;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.sun.source.tree.*;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.TreePathScanner;
 import com.sun.source.util.Trees;
+import java.util.ArrayList;
+import java.util.function.Predicate;
+import org.cmoine.genericEnums.GenericEnum;
 import org.cmoine.genericEnums.processor.util.TreeUtil;
 
 import javax.lang.model.element.*;
@@ -144,10 +148,22 @@ public class TypeElementWrapper {
                 .collect(Collectors.toList());
     }
 
-    public List<InterfaceTreeWrapper> getInterfaceTree() {
-        return classTree.getImplementsClause().stream()
-                .map(InterfaceTreeWrapper::new)
-                .collect(Collectors.toList());
+    public String getGenericWildcardString() {
+        return "?" + Strings.repeat(", ?", genericParameterNames.size() - 1);
+    }
+
+    /**
+     * Get the list of interfaces this class implements. Includes Comparable.
+     *
+     * @return a list of interface names which this class implements.
+     */
+    public List<String> getInterfaceTree() {
+        Set<String> interfaceTreeWrappers = new TreeSet<>();
+        if (!isClass()) {
+            interfaceTreeWrappers.add("Comparable<" + getClassName() + "<" + getGenericWildcardString() + ">>");
+        }
+        interfaceTreeWrappers.addAll(classTree.getImplementsClause().stream().map(InterfaceTreeWrapper::new).map(Object::toString).collect(Collectors.toList()));
+        return new ArrayList<>(interfaceTreeWrappers);
     }
 
     public List<?> getImports() {
@@ -160,6 +176,41 @@ public class TypeElementWrapper {
 
     public List<FieldTreeWrapper> getFieldTree() {
         return fieldTree;
+    }
+
+    /**
+     * Does this type represent a class, as apposed to an enum?
+     *
+     * @return <code>true</code> if this type represents a class, <code>false</code> if it represents an enum.
+     */
+    public boolean isClass() {
+        return typeElement.getKind() == ElementKind.CLASS;
+    }
+
+    /**
+     * Calculate the name of the generated class.
+     * <ul>
+     * <li>If this typeElement is a class, then use the optional {@link GenericEnum} annotation to calculate the name, or the <code>Ext</code> suffix if not present.</li>
+     * <li>If this typeElement is an enum, then use the required {@link GenericEnum} annotation to calculate the name.</li>
+     * </ul>
+     * @return The name to use for the generated class.
+     */
+    public String getClassName() {
+        switch (typeElement.getKind()) {
+            case CLASS:
+                final GenericEnum genericEnum = typeElement.getAnnotation(GenericEnum.class);
+
+                if (genericEnum != null) {
+                    return genericEnum.name().replace("%", typeElement.getSimpleName());
+                }
+                return typeElement.getSimpleName() + "Ext";
+
+            case ENUM:
+                return typeElement.getAnnotation(GenericEnum.class).name().replace("%", typeElement.getSimpleName());
+
+            default:
+                throw new IllegalArgumentException("Unsupported element " + typeElement.getKind());
+        }
     }
 
     public List<EnumConstantTreeWrapper> getEnumConstantTree() {
@@ -185,5 +236,17 @@ public class TypeElementWrapper {
         // TODO Check types
 
         return true;
+    }
+
+    /**
+     * Does the original type have a <code>toString()</code> method.
+     *
+     * @return <code>true</code> if a toString() method is present, <code>false</code> otherwise.
+     */
+    public boolean isToStringMethodPresent() {
+        Predicate<MethodTreeWrapper> isToString = methodTreeWrapper ->
+            methodTreeWrapper.getParameters().isEmpty() && methodTreeWrapper.getName().contentEquals("toString");
+
+        return methodTree.stream().anyMatch(isToString);
     }
 }
