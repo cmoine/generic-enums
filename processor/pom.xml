@@ -63,6 +63,16 @@
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.google.googlejavaformat</groupId>
+      <artifactId>google-java-format</artifactId>
+      <version>1.7</version>
+    </dependency>
+    <dependency>
+      <groupId>org.freemarker</groupId>
+      <artifactId>freemarker-gae</artifactId>
+      <version>2.3.31</version>
+    </dependency>
     <!-- test dependencies -->
     <dependency>
       <groupId>com.google.errorprone</groupId>
