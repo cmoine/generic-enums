@@ -8,6 +8,8 @@ import com.sun.source.util.Trees;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.QualifiedNameable;
 import net.ltgt.gradle.incap.IncrementalAnnotationProcessor;
 import net.ltgt.gradle.incap.IncrementalAnnotationProcessorType;
 import org.cmoine.genericEnums.GenericEnum;
@@ -72,33 +74,70 @@ public class GenericEnumProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         for (TypeElement te : annotations) {
-            Set<? extends Element> elementsAnnotatedWith = roundEnv.getElementsAnnotatedWith(te);
-            for (Element elt : elementsAnnotatedWith) {
-                generate((TypeElement) elt);
+            final Map<TypeElement, Set<TypeElement>> groupedElements = groupElementsByContainer(roundEnv.getElementsAnnotatedWith(te));
+            for (Map.Entry<TypeElement, Set<TypeElement>> entry : groupedElements.entrySet()) {
+                generate(entry.getKey(), entry.getValue());
             }
         }
         return true;
     }
 
-    private void generate(TypeElement typeElement) {
-        try {
-            dump(typeElement, 0);
-            String pkgName = getPackageName(typeElement);
+    /**
+     * Collate annotated enum TypeElements by their top-level TypeElement. If the source enum is a top-level
+     * (i.e. It's parent is a package) then its top-level element is itself.
+     *
+     * @param elementsAnnotatedWith A set of TypeElements annotated with {@link GenericEnum}.
+     * @return A map of top-level TypeElements to source enum TypeElements.
+     */
+    private Map<TypeElement, Set<TypeElement>> groupElementsByContainer(
+        Set<? extends Element> elementsAnnotatedWith) {
+        final Map<TypeElement, Set<TypeElement>> groupedElements = new HashMap<>();
 
-            String className = typeElement.getAnnotation(GenericEnum.class).name().replace("%", typeElement.getSimpleName());
-            // String className = typeElement.getSimpleName().toString() + "Ext";
-            JavaFileObject sourceFile = processingEnv.getFiler()
-                    .createSourceFile(pkgName + "." + className,
-                            typeElement);
+        for (Element element : elementsAnnotatedWith) {
+            if (element.getKind() == ElementKind.ENUM) {
+                if (element.getEnclosingElement() != null && element.getEnclosingElement().getKind() == ElementKind.CLASS) {
+                    Set<TypeElement> elements = groupedElements.computeIfAbsent((TypeElement) element.getEnclosingElement(), (e) -> new LinkedHashSet<>());
+                    elements.add((TypeElement) element);
+
+                } else {
+                    groupedElements.put((TypeElement) element,
+                        new LinkedHashSet<>(Collections.singletonList((TypeElement) element)));
+                }
+            }
+        }
+
+        return groupedElements;
+    }
+
+    /**
+     * Generate pseudo enum declarations using the specified top-level TypeElement and source enum TypeElements.
+     *
+     * @param topLevelTypeElement The source top-level TypeElement
+     * @param enumElements The set of source enum TypeElements to process
+     */
+    private void generate(TypeElement topLevelTypeElement, Set<TypeElement> enumElements) {
+        try {
+            dump(topLevelTypeElement, 0);
+            final String pkgName = getPackageName(topLevelTypeElement);
+            final TypeElementWrapper typeElementWrapper = new TypeElementWrapper(trees, topLevelTypeElement);
+            final JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(pkgName + "." + typeElementWrapper.getClassName(), topLevelTypeElement);
+            final TemplateData dataModel = new TemplateData(getClass(),
+                processingEnv,
+                pkgName,
+                typeElementWrapper,
+                enumElements
+                    .stream()
+                    .map((el) -> new TypeElementWrapper(trees, el))
+                    .collect(Collectors.toSet()));
+
             try (Writer writer = sourceFile.openWriter()) {
                 Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
                 cfg.setClassLoaderForTemplateLoading(getClass().getClassLoader(),
                         getClass().getPackage().getName().replace('.', '/'));
                 cfg.setSharedVariable("instanceOf", new InstanceOfMethod());
                 Template template = cfg.getTemplate("template.ftl");
-                StringWriter source=new StringWriter();
-                template.createProcessingEnvironment(new TemplateData(getClass(),
-                        processingEnv, pkgName, className, new TypeElementWrapper(trees, typeElement)), writer).process();
+                StringWriter source = new StringWriter();
+                template.createProcessingEnvironment(dataModel, source).process();
                 String formattedSource = new Formatter().formatSource(source.toString());
                 writer.write(formattedSource);
             } catch (TemplateException | FormatterException e) {
@@ -142,11 +181,20 @@ public class GenericEnumProcessor extends AbstractProcessor {
         processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, stringWriter.toString());
     }
 
-    private static String getPackageName(TypeElement te) {
-        String qualifiedName = te.getQualifiedName().toString();
-        int index = qualifiedName.lastIndexOf('.');
-        if (index > 0)
-            return qualifiedName.substring(0, index);
-        return qualifiedName;
+    /**
+     * Get the name of the container package for the specified {@link QualifiedNameable}.
+     *
+     * @param qualifiedNameable the contained element
+     * @return the name of the nearest parent package
+     */
+    private static String getPackageName(QualifiedNameable qualifiedNameable) {
+        while (qualifiedNameable != null) {
+            if (qualifiedNameable.getKind() == ElementKind.PACKAGE) {
+                return qualifiedNameable.getQualifiedName().toString();
+            }
+            qualifiedNameable = (QualifiedNameable) qualifiedNameable.getEnclosingElement();
+        }
+
+        return "";
     }
 }

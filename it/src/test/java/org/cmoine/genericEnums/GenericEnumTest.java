@@ -25,7 +25,7 @@ public class GenericEnumTest {
     @Test
     public void testIllegalArgumentException() {
         IllegalArgumentException e = Assert.assertThrows(IllegalArgumentException.class, () -> SimpleGenericEnumExt.valueOf(NON_EXISTENT_ENUM_NAME));
-        Assert.assertEquals("No enum constant org.cmoine.genericEnums.SimpleGenericEnumExt.NON_EXISTENT", e.getMessage());
+        Assert.assertEquals("No enum constant NON_EXISTENT", e.getMessage());
     }
 
     @Test
@@ -78,5 +78,15 @@ public class GenericEnumTest {
     @Test
     public void testNonGenericInterface() {
         Assert.assertTrue(NonGenericImplementsEnumExt.INT instanceof Runnable);
+    }
+
+    @Test
+    public void testOuterClass() {
+        Assert.assertEquals(ENUM_NAME, OuterClassExt.InnerEnumExt.ONE.name());
+    }
+
+    @Test
+    public void testOuterClassExplicitlyNamed() {
+        Assert.assertEquals(ENUM_NAME, MyOuterClass.InnerEnum.ONE.name());
     }
 }
