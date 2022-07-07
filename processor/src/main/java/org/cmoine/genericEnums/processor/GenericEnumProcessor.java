@@ -137,7 +137,7 @@ public class GenericEnumProcessor extends AbstractProcessor {
                 cfg.setSharedVariable("instanceOf", new InstanceOfMethod());
                 Template template = cfg.getTemplate("template.ftl");
                 StringWriter source = new StringWriter();
-                template.createProcessingEnvironment(dataModel, writer).process();
+                template.createProcessingEnvironment(dataModel, source).process();
                 String formattedSource = new Formatter().formatSource(source.toString());
                 writer.write(formattedSource);
             } catch (TemplateException | FormatterException e) {
